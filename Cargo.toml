@@ -1,0 +1,10 @@
+[package]
+name = "offset"
+version = "0.1.0"
+authors = ["Gilad Naaman <gilad.naaman@gmail.com>"]
+
+[dependencies]
+
+[features]
+default = ["std"]
+std = []
