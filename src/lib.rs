@@ -6,7 +6,7 @@
 //! ## Examples
 //! ```
 //! #[macro_use]
-//! extern crate offset;
+//! extern crate memoffset;
 //!
 //! #[repr(C, packed)]
 //! struct HelpMeIAmTrappedInAStructFactory {
@@ -23,7 +23,7 @@
 //!
 //! This functionality can be useful, for example, for checksum calculations:
 //!
-//! ```
+//! ```ignore
 //! #[repr(C, packed)]
 //! struct Message {
 //!     header: MessageHeader,
@@ -56,7 +56,7 @@ pub use core::mem;
 /// ## Examples - Simple
 /// ```
 /// #[macro_use]
-/// extern crate offset;
+/// extern crate memoffset;
 ///
 /// #[repr(C, packed)]
 /// struct Foo {
@@ -75,7 +75,7 @@ pub use core::mem;
 /// ## Examples - Advanced
 /// ```
 /// #[macro_use]
-/// extern crate offset;
+/// extern crate memoffset;
 ///
 /// #[repr(C, packed)]
 /// struct UnnecessarilyComplicatedStruct {
@@ -137,7 +137,7 @@ macro_rules! offset_of {
 /// ## Examples
 /// ```
 /// #[macro_use]
-/// extern crate offset;
+/// extern crate memoffset;
 ///
 /// #[repr(C, packed)]
 /// struct Florp {
@@ -273,5 +273,12 @@ mod tests {
         assert_eq!(0..42,  span_of!(Blarg, x     ..  y[34]));
         assert_eq!(0..64,  span_of!(Blarg, x     ..= y));
         assert_eq!(58..68, span_of!(Blarg, y[50] ..= z));
+    }
+
+    #[test]
+    fn tuple_struct() {
+        #[repr(C,packed)]
+        struct Tup(i32, i32);
+        assert_eq!(offset_of!(Tup, 0), 0);
     }
 }
