@@ -62,11 +62,11 @@
 
 #[cfg(feature = "std")]
 #[doc(hidden)]
-pub use std::{mem, ptr};
+pub use std::mem;
 
 #[cfg(not(feature = "std"))]
 #[doc(hidden)]
-pub use core::{mem, ptr};
+pub use core::mem;
 
 #[macro_use]
 mod offset_of;
