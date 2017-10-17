@@ -16,6 +16,12 @@ Add the following dependency to your `Cargo.toml`:
 memoffset = "0.1"
 ```
 
+If you're working in a no-std environment, use the following dependency instead (functionality is identical):
+```toml
+[dependencies]
+memoffset = { version = "0.1", default-features = false }
+```
+
 Add the following lines at the top of your `main.rs` or `lib.rs` files.
 
 ```rust
