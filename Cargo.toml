@@ -3,7 +3,7 @@ name = "memoffset"
 version = "0.1.0"
 authors = ["Gilad Naaman <gilad.naaman@gmail.com>"]
 description="offset_of functionality for Rust structs."
-license="Apache-2.0"
+license="MIT"
 readme="README.md"
 
 [dependencies]
