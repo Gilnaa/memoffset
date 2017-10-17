@@ -39,5 +39,7 @@ assert_eq!(offset_of!(Foo, c[3]), 11);
 assert_eq!(span_of!(Foo, a),          0..4);
 assert_eq!(span_of!(Foo, a ..  c),    0..8);
 assert_eq!(span_of!(Foo, a ..  c[1]), 0..9);
-assert_eq!(span_of!(Foo, a .. =c[1]), 0..10);
+assert_eq!(span_of!(Foo, a ..= c[1]), 0..10);
+assert_eq!(span_of!(Foo, ..= d),      0..14);
+assert_eq!(span_of!(Foo, b ..),       4..17);
 ```

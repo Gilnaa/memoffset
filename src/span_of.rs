@@ -50,6 +50,9 @@
 /// *Note*: 
 /// This macro may not make much sense when used on structs that are not `#[repr(C, packed)]`
 ///
+/// *Note*:
+/// Currently, the ..= operator is unstable, so any expression using it will emit `start..(end+1)`, instead of `start..=end`.
+///
 /// ## Examples
 /// ```
 /// #[macro_use]
