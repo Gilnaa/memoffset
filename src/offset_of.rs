@@ -22,7 +22,7 @@
 /// This macro supports arbitrary amount of subscripts and recursive member-accesses.
 ///
 /// *Note*: This macro may not make much sense when used on structs that are not `#[repr(C, packed)]`
-/// 
+///
 /// ## Examples - Simple
 /// ```
 /// #[macro_use]
@@ -84,7 +84,7 @@ mod tests {
     struct Foo {
         a: u32,
         b: [u8; 4],
-        c: i64
+        c: i64,
     }
 
     #[test]
@@ -104,10 +104,10 @@ mod tests {
     fn offset_index_out_of_bounds() {
         offset_of!(Foo, b[4]);
     }
-    
+
     #[test]
     fn tuple_struct() {
-        #[repr(C,packed)]
+        #[repr(C, packed)]
         struct Tup(i32, i32);
 
         assert_eq!(offset_of!(Tup, 0), 0);

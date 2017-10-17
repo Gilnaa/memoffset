@@ -22,7 +22,7 @@
 //!
 //! Some of the funcationality of the crate makes no sense when used along with structs that
 //! are not `#[repr(C, packed)]`, but it is up to the user to make sure that they are.
-//! 
+//!
 //! ## Examples
 //! ```
 //! #[macro_use]
@@ -52,7 +52,7 @@
 //!     payload: [u8; 1024],
 //!     checksum: u16
 //! }
-//! 
+//!
 //! let checksum_range = &raw[span_of!(Message, header..checksum)];
 //! let checksum = crc16(checksum_range);
 //! ```
@@ -60,11 +60,11 @@
 // Support for the usage of this crate without the standard library.
 #![cfg_attr(not(feature="std"), no_std)]
 
-#[cfg(feature="std")]
+#[cfg(feature = "std")]
 #[doc(hidden)]
 pub use std::{mem, ptr};
 
-#[cfg(not(feature="std"))]
+#[cfg(not(feature = "std"))]
 #[doc(hidden)]
 pub use core::{mem, ptr};
 
