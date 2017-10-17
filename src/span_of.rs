@@ -37,9 +37,18 @@
 /// span_of!(Struct, member_a .. member_b)
 /// // Inclusive
 /// span_of!(Struct, member_a ..= member_b)
+///
+/// // Open-ended ranges
+/// span_of!(Struct, .. end)
+/// span_of!(Struct, start ..)
 /// ```
 ///
-/// *Note*: This macro may not make much sense when used on structs that are not `#[repr(C, packed)]`
+/// *Note*: 
+/// This macro uses recursion in order to resolve the range expressions, so there is a limit to the complexity of the expression.
+/// In order to raise the limit, the compiler's recursion limit should be lifted.
+///
+/// *Note*: 
+/// This macro may not make much sense when used on structs that are not `#[repr(C, packed)]`
 ///
 /// ## Examples
 /// ```
