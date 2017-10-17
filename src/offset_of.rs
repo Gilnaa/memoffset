@@ -67,10 +67,12 @@
 #[macro_export]
 macro_rules! offset_of {
     ($father:ty, $($field:tt)+) => ({
-        let root: *const $father = $crate::ptr::null();
+        let root: $father = unsafe { $crate::mem::uninitialized() };
 
-        let base = root as usize;
-        let member = unsafe { &(*root).$($field)* } as *const _ as usize;
+        let base = &root as *const _ as usize;
+        let member =  &root.$($field)* as *const _ as usize;
+
+        $crate::mem::forget(root);
 
         member - base
     });

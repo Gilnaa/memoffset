@@ -83,21 +83,23 @@ macro_rules! span_of {
     });
 
     ($father:ty,  $field_a:ident $([$index:expr])* ..= $($field_b:tt)+) => ({
-        let root: *const $father = $crate::ptr::null();
+        let root: $father = unsafe { $crate::mem::uninitialized() };
 
         let start = offset_of!($father, $field_a $([$index])*);
-        let end = offset_of!($father, $($field_b)+) + 
-                    unsafe { $crate::mem::size_of_val(&(*root).$($field_b)+) };
+        let end = offset_of!($father, $($field_b)+) + $crate::mem::size_of_val(&root.$($field_b)+);
+
+        $crate::mem::forget(root);
 
         start..end
     });
     ($father:ty, $($field:tt)+) => ({
-        let root: *const $father = $crate::ptr::null();
+        let root: $father = unsafe { $crate::mem::uninitialized() };
 
         let start = offset_of!($father, $($field)+);
-        let end = start + 
-                    unsafe { $crate::mem::size_of_val(&(*root).$($field)+) };
-
+        let end = start + $crate::mem::size_of_val(&root.$($field)+);
+        
+        $crate::mem::forget(root);
+        
         start..end
     });
 }
