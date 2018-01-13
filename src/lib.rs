@@ -57,14 +57,10 @@
 //! let checksum = crc16(checksum_range);
 //! ```
 
-// Support for the usage of this crate without the standard library.
-#![cfg_attr(not(feature="std"), no_std)]
+#![no_std]
 
-#[cfg(feature = "std")]
-#[doc(hidden)]
-pub use std::mem;
-
-#[cfg(not(feature = "std"))]
+// This `use` statement enables the macros to use `$crate::mem`.
+// Doing this enables this crate to function under both std and no-std crates.
 #[doc(hidden)]
 pub use core::mem;
 

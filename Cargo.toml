@@ -1,6 +1,6 @@
 [package]
 name = "memoffset"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Gilad Naaman <gilad.naaman@gmail.com>"]
 description = "offset_of functionality for Rust structs."
 license = "MIT"
@@ -10,7 +10,3 @@ keywords = ["mem", "offset", "offset_of", "offsetof"]
 categories = ["no-std"]
 
 [dependencies]
-
-[features]
-default = ["std"]
-std = []
