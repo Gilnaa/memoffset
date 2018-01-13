@@ -132,7 +132,7 @@ macro_rules! span_of {
 
 #[cfg(test)]
 mod tests {
-    use ::*;
+    use std::mem;
 
     #[repr(C, packed)]
     struct Foo {
