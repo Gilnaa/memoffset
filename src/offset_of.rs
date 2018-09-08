@@ -105,6 +105,7 @@ mod tests {
 
     #[test]
     #[should_panic]
+    #[allow(const_err)]
     fn offset_index_out_of_bounds() {
         offset_of!(Foo, b[4]);
     }
