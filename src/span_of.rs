@@ -43,11 +43,11 @@
 /// span_of!(Struct, start ..)
 /// ```
 ///
-/// *Note*: 
+/// *Note*:
 /// This macro uses recursion in order to resolve the range expressions, so there is a limit to the complexity of the expression.
 /// In order to raise the limit, the compiler's recursion limit should be lifted.
 ///
-/// *Note*: 
+/// *Note*:
 /// This macro may not make much sense when used on structs that are not `#[repr(C, packed)]`
 ///
 /// ## Examples
@@ -77,7 +77,7 @@
 ///     assert_eq!(0..42,  span_of!(Blarg, x     ..  y[34]));
 ///     assert_eq!(0..64,  span_of!(Blarg, x     ..= y));
 ///     assert_eq!(58..68, span_of!(Blarg, y[50] ..= z));
-/// 
+///
 ///     const SPAN: std::ops::Range<usize> = span_of!(Blarg, y[50] ..= z);
 ///     assert_eq!(58..68, SPAN);
 /// }
@@ -90,7 +90,7 @@ macro_rules! span_of {
     (@helper $root:ident, [] ..) => (
         compile_error!("Expected a range, found '..'")
     );
-    (@helper $root:ident, [] ..= $($field:tt)+) => (        
+    (@helper $root:ident, [] ..= $($field:tt)+) => (
         0..($crate::Transmuter { ptr: &$root.$($field)+ }.int + $crate::size_of(&$root.$($field)+))
     );
     (@helper $root:ident, [] .. $($field:tt)+) => (
@@ -120,7 +120,7 @@ macro_rules! span_of {
         span_of!(@helper $root, #$tt [] $($rest)*)
     };
 
-    ($parent:ty, $($exp:tt)+) => (unsafe {   
+    ($parent:ty, $($exp:tt)+) => (unsafe {
         let root: &'static $parent = $crate::Transmuter::<$parent> { int: 0 }.ptr;
         span_of!(@helper root, [] $($exp)*)
     });
@@ -128,7 +128,7 @@ macro_rules! span_of {
 
 #[cfg(test)]
 mod tests {
-    use ::core::mem;
+    use core::mem;
 
     #[repr(C, packed)]
     struct Foo {
@@ -171,8 +171,8 @@ mod tests {
 
         assert_eq!(8..64, span_of!(Blarg, y[0]..z));
         assert_eq!(0..42, span_of!(Blarg, x..y[34]));
-        assert_eq!(0..64, span_of!(Blarg, x     ..= y));
-        assert_eq!(58..68, span_of!(Blarg, y[50] ..= z));
+        assert_eq!(0..64, span_of!(Blarg, x..=y));
+        assert_eq!(58..68, span_of!(Blarg, y[50]..=z));
     }
 
     #[test]
