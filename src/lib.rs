@@ -22,6 +22,9 @@
 //!
 //! Some of the funcationality of the crate makes no sense when used along with structs that
 //! are not `#[repr(C, packed)]`, but it is up to the user to make sure that they are.
+//! 
+//! This functionality should work for `const`s but presently doesn't work on `const fn`. Storing a
+//! value in a const and then returning it from a `const fn` should workaround most cases.
 //!
 //! ## Examples
 //! ```
@@ -63,6 +66,19 @@
 // Doing this enables this crate to function under both std and no-std crates.
 #[doc(hidden)]
 pub use core::mem;
+
+// A helper to get a const fn version of size_of_val 
+#[doc(hidden)]
+pub const fn size_of<T>(_: &T) -> usize { mem::size_of::<T>() }
+
+// While constant pointer transmutation isn't stable, union transmutation is
+// This hack should go away after rust-lang/rust#51910
+#[doc(hidden)]
+pub union Transmuter<T: 'static> {
+    pub ptr: &'static T,
+    pub int: usize,
+}
+
 
 #[macro_use]
 mod offset_of;
