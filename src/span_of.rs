@@ -44,15 +44,8 @@
 /// ```
 ///
 /// *Note*: 
-/// This macro uses recursion in order to resolve the range expressions, so there is a limit to the
-/// complexity of the expression.
-/// 
-/// It also supports a lambda-like notation for completely arbitrary expressions like:
-/// `(x -> &x.foo)..(x -> &x.bar[1])`
-///
-/// These expressions are more powerful, and are not subject to the recursion limit. Each lambda
-/// should act as though it is taking a static reference to an uninitialized object and returning
-/// a reference to a field within that same object.
+/// This macro uses recursion in order to resolve the range expressions, so there is a limit to the complexity of the expression.
+/// In order to raise the limit, the compiler's recursion limit should be lifted.
 ///
 /// *Note*: 
 /// This macro may not make much sense when used on structs that are not `#[repr(C, packed)]`
@@ -84,90 +77,53 @@
 ///     assert_eq!(0..42,  span_of!(Blarg, x     ..  y[34]));
 ///     assert_eq!(0..64,  span_of!(Blarg, x     ..= y));
 ///     assert_eq!(58..68, span_of!(Blarg, y[50] ..= z));
+/// 
+///     const SPAN: std::ops::Range<usize> = span_of!(Blarg, y[50] ..= z);
+///     assert_eq!(58..68, SPAN);
 /// }
 /// ```
 #[macro_export]
 macro_rules! span_of {
-    (@helper $parent:ty, $id:ident -> $start:expr, $end:expr) => (unsafe {        
-        let $id: &'static $parent = $crate::Transmuter::<$parent> { int: 0 }.ptr;
-        let start = $crate::Transmuter { ptr: $start }.int;
-        start..$end
-    });
-
-    (@helper $parent:ty, $id:ident -> $start:expr, $id2:ident -> $end:expr, $extra:expr) => (
-        span_of!(@helper $parent, $id -> $start, {
-            let $id2 = $id;
-            let end = $crate::Transmuter { ptr: $end }.int;
-            end + $extra
-        })
-    );
-
-    (@helper $parent:ty, [] ..=) => (
+    (@helper $root:ident, [] ..=) => (
         compile_error!("Expected a range, found '..='")
     );
-    (@helper $parent:ty, [] ..) => (
+    (@helper $root:ident, [] ..) => (
         compile_error!("Expected a range, found '..'")
     );
-    (@helper $parent:ty, [] ..= $($field:tt)+) => (
-        span_of!($parent, ..=(x -> &x.$($field)*))
+    (@helper $root:ident, [] ..= $($field:tt)+) => (        
+        0..($crate::Transmuter { ptr: &$root.$($field)+ }.int + $crate::size_of(&$root.$($field)+))
     );
-    (@helper $parent:ty, [] .. $($field:tt)+) => (
-        span_of!($parent, ..(x -> &x.$($field)*))
+    (@helper $root:ident, [] .. $($field:tt)+) => (
+        0..$crate::Transmuter { ptr: &$root.$($field)+ }.int
     );
-    (@helper $parent:ty, $(# $begin:tt)+ [] ..= $($end:tt)+) => (
-        span_of!($parent, (x -> &x.$($begin)*)..=(x -> &x.$($end)*))
+    (@helper $root:ident, $(# $begin:tt)+ [] ..= $($end:tt)+) => (
+        $crate::Transmuter { ptr: &$root.$($begin)+ }.int..($crate::Transmuter { ptr: &$root.$($end)+ }.int + $crate::size_of(&$root.$($end)+))
     );
-    (@helper $parent:ty, $(# $begin:tt)+ [] .. $($end:tt)+) => (
-        span_of!($parent, (x -> &x.$($begin)*)..(x -> &x.$($end)*))
+    (@helper $root:ident, $(# $begin:tt)+ [] .. $($end:tt)+) => (
+        $crate::Transmuter { ptr: &$root.$($begin)+ }.int..$crate::Transmuter { ptr: &$root.$($end)+ }.int
     );
-    (@helper $parent:ty, $(# $begin:tt)+ [] ..) => (
-        span_of!($parent, x -> &x.$($begin)*)
+    (@helper $root:ident, $(# $begin:tt)+ [] ..) => (
+        $crate::Transmuter { ptr: &$root.$($begin)+ }.int..$crate::size_of($root)
     );
-    (@helper $parent:ty, $(# $begin:tt)+ [] ..=) => {
+    (@helper $root:ident, $(# $begin:tt)+ [] ..=) => {
         compile_error!(
             "Found inclusive range to the end of a struct. Did you mean '..' instead of '..='?")
     };
-    (@helper $parent:ty, $(# $begin:tt)+ [] ) => (
-        span_of!($parent, (x -> &x.$($begin)*)..=(x -> &x.$($begin)*))
-    );
-    (@helper $parent:ty, $(# $begin:tt)+ [] $tt:tt $($rest:tt)*) => {
-        span_of!(@helper $parent, $(#$begin)* #$tt [] $($rest)*)
+    (@helper $root:ident, $(# $begin:tt)+ [] ) => ({
+        let start = $crate::Transmuter { ptr: &$root.$($begin)+ }.int;
+        start..(start + $crate::size_of(&$root.$($begin)+))
+    });
+    (@helper $root:ident, $(# $begin:tt)+ [] $tt:tt $($rest:tt)*) => {
+        span_of!(@helper $root, $(#$begin)* #$tt [] $($rest)*)
     };
-    (@helper $parent:ty, [] $tt:tt $($rest:tt)*) => {
-        span_of!(@helper $parent, #$tt [] $($rest)*)
+    (@helper $root:ident, [] $tt:tt $($rest:tt)*) => {
+        span_of!(@helper $root, #$tt [] $($rest)*)
     };
 
-
-    ($parent:ty,  .. ($id2:ident -> $end:expr)) => (
-        span_of!(@helper $parent, x -> x, $id2 -> $end, 0)
-    );
-    ($parent:ty,  ..= ($id2:ident -> $end:expr)) => (
-        span_of!(@helper $parent, x -> x, $id2 -> $end, $crate::size_of($end))
-    );
-
-    ($parent:ty, $id:ident -> $start:expr) => (
-        span_of!(@helper $parent, $id -> $start, $crate::mem::size_of::<$parent>())
-    );
-
-    ($parent:ty, ($id:ident -> $start:expr)..) => (
-        span_of!($parent, $id -> $start)
-    );
-    ($parent:ty, ($id:ident -> $start:expr) .. ($id2:ident -> $end:expr)) => (
-        span_of!(@helper $parent, $id -> $start, $id2 -> $end, 0)
-    );
-    ($parent:ty, ($id:ident -> $start:expr) ..= ($id2:ident -> $end:expr)) => (
-        span_of!(@helper $parent, $id -> $start, $id2 -> $end, $crate::size_of($end))
-    );
-    
-    ($parent:ty, ($id:ident -> $start:expr) .. ) => (
-        compile_error!("Expected a range, found '..'")
-    );
-    ($parent:ty, ($id:ident -> $start:expr) ..= ) => (
-        compile_error!("Expected a range, found '..='")
-    );
-
-
-    ($parent:ty, $($exp:tt)+) => (span_of!(@helper $parent, [] $($exp)*));
+    ($parent:ty, $($exp:tt)+) => (unsafe {   
+        let root: &'static $parent = $crate::Transmuter::<$parent> { int: 0 }.ptr;
+        span_of!(@helper root, [] $($exp)*)
+    });
 }
 
 #[cfg(test)]
@@ -179,13 +135,6 @@ mod tests {
         a: u32,
         b: [u8; 4],
         c: i64,
-    }
-
-    #[test]
-    fn span_integer() {
-        assert_eq!(span_of!(u32, x -> x), 0..4);
-        assert_eq!(span_of!(u32, (x -> x)..(x -> x)), 0..0);
-        assert_eq!(span_of!(u32, (x -> x)..=(x -> x)), 0..4);
     }
 
     #[test]

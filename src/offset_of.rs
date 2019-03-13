@@ -20,12 +20,6 @@
 
 /// Calculates the offset of the specified field from the start of the struct.
 /// This macro supports arbitrary amount of subscripts and recursive member-accesses.
-/// 
-/// It also supports a lambda-like notation for completely arbitrary expressions like:
-/// `x -> &x.foo`
-/// 
-/// These lambdas should act as though they are taking a static reference to an uninitialized object
-/// and returning a reference to a field within that same object.
 ///
 /// *Note*: This macro may not make much sense when used on structs that are not `#[repr(C, packed)]`
 ///
@@ -65,22 +59,18 @@
 ///     c: [u8; 5]
 /// }
 ///
-/// const OFFSET: usize = offset_of!(UnnecessarilyComplicatedStruct, x -> &x.member[3].c[3]);
+///
 /// fn main() {
+///     const OFFSET: usize = offset_of!(UnnecessarilyComplicatedStruct, member[3].c[3]);
 ///     assert_eq!(OFFSET, 66);
 /// }
 /// ```
-/// 
 #[macro_export]
 macro_rules! offset_of {
-    ($parent:ty, $id:ident -> ) => (
-        compile_error!("Missing expression after '->'")
-    );
-    ($parent:ty, $id:ident -> $field:expr) => (unsafe {
-        let $id: &'static $parent = $crate::Transmuter::<$parent> { int: 0 }.ptr;
-        $crate::Transmuter { ptr: $field }.int
+    ($parent:ty, $($field:tt)+) => (unsafe {
+        let x: &'static $parent = $crate::Transmuter::<$parent> { int: 0 }.ptr;
+        $crate::Transmuter { ptr: &x.$($field)+ }.int
     });
-    ($parent:ty, $($field:tt)+) => (offset_of!($parent, x -> &x.$($field)+));
 }
 
 #[cfg(test)]
@@ -90,11 +80,6 @@ mod tests {
         a: u32,
         b: [u8; 4],
         c: i64,
-    }
-
-    #[test]
-    fn offset_integer() {
-        assert_eq!(offset_of!(u32, x -> x), 0);
     }
 
     #[test]
