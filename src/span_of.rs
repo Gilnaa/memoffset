@@ -77,42 +77,42 @@
 ///     assert_eq!(0..42,  span_of!(Blarg, x     ..  y[34]));
 ///     assert_eq!(0..64,  span_of!(Blarg, x     ..= y));
 ///     assert_eq!(58..68, span_of!(Blarg, y[50] ..= z));
+/// 
+///     const SPAN: std::ops::Range<usize> = span_of!(Blarg, y[50] ..= z);
+///     assert_eq!(58..68, SPAN);
 /// }
 /// ```
 #[macro_export]
 macro_rules! span_of {
-    (@helper $root:ident, [] ..=) => {
+    (@helper $root:ident, [] ..=) => (
         compile_error!("Expected a range, found '..='")
-    };
-    (@helper $root:ident, [] ..) => {
+    );
+    (@helper $root:ident, [] ..) => (
         compile_error!("Expected a range, found '..'")
-    };
-    (@helper $root:ident, [] ..= $($field:tt)+) => {
-        (&$root as *const _ as usize,
-         &$root.$($field)* as *const _ as usize + $crate::mem::size_of_val(&$root.$($field)*))
-    };
-    (@helper $root:ident, [] .. $($field:tt)+) => {
-        (&$root as *const _ as usize, &$root.$($field)* as *const _ as usize)
-    };
-    (@helper $root:ident, $(# $begin:tt)+ [] ..= $($end:tt)+) => {
-        (&$root.$($begin)* as *const _ as usize,
-         &$root.$($end)* as *const _ as usize + $crate::mem::size_of_val(&$root.$($end)*))
-    };
-    (@helper $root:ident, $(# $begin:tt)+ [] .. $($end:tt)+) => {
-        (&$root.$($begin)* as *const _ as usize, &$root.$($end)* as *const _ as usize)
-    };
-    (@helper $root:ident, $(# $begin:tt)+ [] ..) => {
-        (&$root.$($begin)* as *const _ as usize,
-         &$root as *const _ as usize + $crate::mem::size_of_val(&$root))
-    };
+    );
+    (@helper $root:ident, [] ..= $($field:tt)+) => (        
+        0..($crate::Transmuter { ptr: &$root.$($field)+ }.int + $crate::size_of(&$root.$($field)+))
+    );
+    (@helper $root:ident, [] .. $($field:tt)+) => (
+        0..$crate::Transmuter { ptr: &$root.$($field)+ }.int
+    );
+    (@helper $root:ident, $(# $begin:tt)+ [] ..= $($end:tt)+) => (
+        $crate::Transmuter { ptr: &$root.$($begin)+ }.int..($crate::Transmuter { ptr: &$root.$($end)+ }.int + $crate::size_of(&$root.$($end)+))
+    );
+    (@helper $root:ident, $(# $begin:tt)+ [] .. $($end:tt)+) => (
+        $crate::Transmuter { ptr: &$root.$($begin)+ }.int..$crate::Transmuter { ptr: &$root.$($end)+ }.int
+    );
+    (@helper $root:ident, $(# $begin:tt)+ [] ..) => (
+        $crate::Transmuter { ptr: &$root.$($begin)+ }.int..$crate::size_of($root)
+    );
     (@helper $root:ident, $(# $begin:tt)+ [] ..=) => {
         compile_error!(
             "Found inclusive range to the end of a struct. Did you mean '..' instead of '..='?")
     };
-    (@helper $root:ident, $(# $begin:tt)+ []) => {
-        (&$root.$($begin)* as *const _ as usize,
-         &$root.$($begin)* as *const _ as usize + $crate::mem::size_of_val(&$root.$($begin)*))
-    };
+    (@helper $root:ident, $(# $begin:tt)+ [] ) => ({
+        let start = $crate::Transmuter { ptr: &$root.$($begin)+ }.int;
+        start..(start + $crate::size_of(&$root.$($begin)+))
+    });
     (@helper $root:ident, $(# $begin:tt)+ [] $tt:tt $($rest:tt)*) => {
         span_of!(@helper $root, $(#$begin)* #$tt [] $($rest)*)
     };
@@ -120,13 +120,9 @@ macro_rules! span_of {
         span_of!(@helper $root, #$tt [] $($rest)*)
     };
 
-    ($sty:ty, $($exp:tt)+) => ({
-        unsafe { 
-            let root: $sty = $crate::mem::uninitialized();
-            let base = &root as *const _ as usize;
-            let (begin, end) = span_of!(@helper root, [] $($exp)*);
-            begin-base..end-base
-        }
+    ($parent:ty, $($exp:tt)+) => (unsafe {   
+        let root: &'static $parent = $crate::Transmuter::<$parent> { int: 0 }.ptr;
+        span_of!(@helper root, [] $($exp)*)
     });
 }
 

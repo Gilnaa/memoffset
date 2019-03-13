@@ -61,24 +61,15 @@
 ///
 ///
 /// fn main() {
-///     assert_eq!(offset_of!(UnnecessarilyComplicatedStruct, member[3].c[3]), 66);
+///     const OFFSET: usize = offset_of!(UnnecessarilyComplicatedStruct, member[3].c[3]);
+///     assert_eq!(OFFSET, 66);
 /// }
 /// ```
 #[macro_export]
 macro_rules! offset_of {
-    ($father:ty, $($field:tt)+) => ({
-        #[allow(unused_unsafe)]
-        let root: $father = unsafe { $crate::mem::uninitialized() };
-
-        let base = &root as *const _ as usize;
-
-        // Future error: borrow of packed field requires unsafe function or block (error E0133)
-        #[allow(unused_unsafe)]
-        let member =  unsafe { &root.$($field)* as *const _ as usize };
-
-        $crate::mem::forget(root);
-
-        member - base
+    ($parent:ty, $($field:tt)+) => (unsafe {
+        let x: &'static $parent = $crate::Transmuter::<$parent> { int: 0 }.ptr;
+        $crate::Transmuter { ptr: &x.$($field)+ }.int
     });
 }
 
