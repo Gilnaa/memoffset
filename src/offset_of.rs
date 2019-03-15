@@ -66,10 +66,30 @@
 /// }
 /// ```
 #[macro_export]
+#[cfg(memoffset_constant_expression)]
 macro_rules! offset_of {
     ($parent:ty, $($field:tt)+) => (unsafe {
         let x: &'static $parent = $crate::Transmuter::<$parent> { int: 0 }.ptr;
         $crate::Transmuter { ptr: &x.$($field)+ }.int
+    });
+}
+
+#[macro_export]
+#[cfg(not(memoffset_constant_expression))]
+macro_rules! offset_of {
+    ($father:ty, $($field:tt)+) => ({
+        #[allow(unused_unsafe)]
+        let root: $father = unsafe { $crate::mem::uninitialized() };
+
+        let base = &root as *const _ as usize;
+
+        // Future error: borrow of packed field requires unsafe function or block (error E0133)
+        #[allow(unused_unsafe)]
+        let member =  unsafe { &root.$($field)* as *const _ as usize };
+
+        $crate::mem::forget(root);
+
+        member - base
     });
 }
 
