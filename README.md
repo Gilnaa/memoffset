@@ -27,13 +27,16 @@ If you wish to use an older rustc version, lock your dependency to "0.2"
 
 Add the following lines at the top of your `main.rs` or `lib.rs` files.
 
-```rust
+```rust,ignore
 #[macro_use]
 extern crate memoffset;
 ```
 
 ## Examples ##
 ```rust
+#[macro_use]
+extern crate memoffset;
+
 #[repr(C, packed)]
 struct Foo {
 	a: u32,
@@ -42,13 +45,15 @@ struct Foo {
 	d: u32,
 }
 
-assert_eq!(offset_of!(Foo, b), 4);
-assert_eq!(offset_of!(Foo, c[3]), 11);
+fn main() {
+	assert_eq!(offset_of!(Foo, b), 4);
+	assert_eq!(offset_of!(Foo, c[3]), 11);
 
-assert_eq!(span_of!(Foo, a),          0..4);
-assert_eq!(span_of!(Foo, a ..  c),    0..8);
-assert_eq!(span_of!(Foo, a ..  c[1]), 0..9);
-assert_eq!(span_of!(Foo, a ..= c[1]), 0..10);
-assert_eq!(span_of!(Foo, ..= d),      0..14);
-assert_eq!(span_of!(Foo, b ..),       4..17);
+	assert_eq!(span_of!(Foo, a),          0..4);
+	assert_eq!(span_of!(Foo, a ..  c),    0..8);
+	assert_eq!(span_of!(Foo, a ..  c[1]), 0..9);
+	assert_eq!(span_of!(Foo, a ..= c[1]), 0..10);
+	assert_eq!(span_of!(Foo, ..= d),      0..17);
+	assert_eq!(span_of!(Foo, b ..),       4..17);
+}
 ```
