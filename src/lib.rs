@@ -67,12 +67,8 @@
 #[doc(hidden)]
 pub use core::mem;
 
-#[cfg(memoffset_constant_expression)]
 #[doc(hidden)]
-mod constant_impl;
-
-#[cfg(memoffset_constant_expression)]
-pub use constant_impl::{size_of, Transmuter};
+pub use core::ptr;
 
 #[macro_use]
 mod offset_of;

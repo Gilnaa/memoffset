@@ -66,30 +66,30 @@
 /// }
 /// ```
 #[macro_export]
-#[cfg(memoffset_constant_expression)]
+#[cfg(memoffset_maybe_uninit)]
 macro_rules! offset_of {
-    ($parent:ty, $($field:tt)+) => (unsafe {
-        let x: &'static $parent = $crate::Transmuter::<$parent> { int: 0 }.ptr;
-        $crate::Transmuter { ptr: &x.$($field)+ }.int
+    ($parent:ty, $field:tt) => (unsafe {
+        // Create an instance of the container and calculate the offset to its
+        // field. Although we are creating references to uninitialized data this
+        // is fine since we are not dereferencing them.
+        let val = $crate::mem::MaybeUninit::<$parent>::uninitialized();
+        let &$container { $field: ref f, .. } = &*val.as_ptr();
+        #[allow(unused_unsafe)]
+        let result = unsafe { (f as *const _ as *const u8).offset_from(val.as_ptr() as *const u8) };
+        result as isize
     });
 }
 
 #[macro_export]
-#[cfg(not(memoffset_constant_expression))]
+#[cfg(not(memoffset_maybe_uninit))]
 macro_rules! offset_of {
-    ($father:ty, $($field:tt)+) => ({
+    ($parent:ty, $field:tt) => ({
+        let non_null = $crate::ptr::NonNull::<$parent>::dangling();
+        let base_ptr = unsafe { non_null.as_ref() };
         #[allow(unused_unsafe)]
-        let root: $father = unsafe { $crate::mem::uninitialized() };
-
-        let base = &root as *const _ as usize;
-
-        // Future error: borrow of packed field requires unsafe function or block (error E0133)
-        #[allow(unused_unsafe)]
-        let member =  unsafe { &root.$($field)* as *const _ as usize };
-
-        $crate::mem::forget(root);
-
-        member - base
+        let field_ptr = unsafe { &base_ptr.$field };
+        let offset = (field_ptr as *const _ as usize) - (base_ptr as *const _ as usize);
+        offset
     });
 }
 
@@ -107,18 +107,6 @@ mod tests {
         assert_eq!(offset_of!(Foo, a), 0);
         assert_eq!(offset_of!(Foo, b), 4);
         assert_eq!(offset_of!(Foo, c), 8);
-    }
-
-    #[test]
-    fn offset_index() {
-        assert_eq!(offset_of!(Foo, b[2]), 6);
-    }
-
-    #[test]
-    #[should_panic]
-    #[allow(const_err)]
-    fn offset_index_out_of_bounds() {
-        offset_of!(Foo, b[4]);
     }
 
     #[test]

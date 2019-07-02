@@ -267,29 +267,14 @@ mod tests {
             span_of!(Test, y..),
             offset_of!(Test, y)..mem::size_of::<Test>()
         );
-        assert_eq!(
-            span_of!(Test, y[0]..),
-            offset_of!(Test, y[0])..mem::size_of::<Test>()
-        );
+        
         assert_eq!(
             span_of!(Test, z..),
             offset_of!(Test, z)..mem::size_of::<Test>()
         );
         assert_eq!(
-            span_of!(Test, z.foo..),
-            offset_of!(Test, z.foo)..mem::size_of::<Test>()
-        );
-        assert_eq!(
             span_of!(Test, egg..),
             offset_of!(Test, egg)..mem::size_of::<Test>()
-        );
-        assert_eq!(
-            span_of!(Test, egg[0]..),
-            offset_of!(Test, egg[0])..mem::size_of::<Test>()
-        );
-        assert_eq!(
-            span_of!(Test, egg[0][0]..),
-            offset_of!(Test, egg[0][0])..mem::size_of::<Test>()
         );
         assert_eq!(
             span_of!(Test, x..y),
@@ -300,24 +285,8 @@ mod tests {
             offset_of!(Test, x)..offset_of!(Test, y) + mem::size_of::<[u8; 56]>()
         );
         assert_eq!(
-            span_of!(Test, x..y[4]),
-            offset_of!(Test, x)..offset_of!(Test, y[4])
-        );
-        assert_eq!(
             span_of!(Test, x..=y[4]),
             offset_of!(Test, x)..offset_of!(Test, y) + mem::size_of::<[u8; 5]>()
-        );
-        assert_eq!(
-            span_of!(Test, x..z.foo),
-            offset_of!(Test, x)..offset_of!(Test, z.foo)
-        );
-        assert_eq!(
-            span_of!(Test, x..=z.foo),
-            offset_of!(Test, x)..offset_of!(Test, z.foo) + mem::size_of::<u32>()
-        );
-        assert_eq!(
-            span_of!(Test, egg[0][0]..egg[1][0]),
-            offset_of!(Test, egg[0][0])..offset_of!(Test, egg[1][0])
         );
     }
 }
