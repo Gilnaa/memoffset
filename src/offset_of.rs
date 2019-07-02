@@ -61,21 +61,11 @@
 ///
 ///
 /// fn main() {
-///     const OFFSET: usize = offset_of!(UnnecessarilyComplicatedStruct, member[3].c[3]);
-///     assert_eq!(OFFSET, 66);
+///     let offset = offset_of!(UnnecessarilyComplicatedStruct, member[3].c[3]);
+///     assert_eq!(offset, 66);
 /// }
 /// ```
 #[macro_export]
-#[cfg(memoffset_constant_expression)]
-macro_rules! offset_of {
-    ($parent:ty, $($field:tt)+) => (unsafe {
-        let x: &'static $parent = $crate::Transmuter::<$parent> { int: 0 }.ptr;
-        $crate::Transmuter { ptr: &x.$($field)+ }.int
-    });
-}
-
-#[macro_export]
-#[cfg(not(memoffset_constant_expression))]
 macro_rules! offset_of {
     ($father:ty, $($field:tt)+) => ({
         #[allow(unused_unsafe)]
