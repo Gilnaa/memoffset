@@ -1,16 +1,16 @@
 sudo: false
 language: rust
 rust:
-  - 1.19.0  # Oldest supported
-  - 1.33.0  # Oldest supported with constant expressions
+  - 1.25.0  # Oldest supported
+  - 1.36.0  # Oldest supported with MaybeUninit
   - stable
   - beta
   - nightly
 matrix:
   include:
   - env: RUSTFMT
-    rust: 1.19.0
-    rust: 1.33.0
+    rust: 1.25.0
+    rust: 1.36.0
     install:
     - rustup component add rustfmt-preview
     script:
