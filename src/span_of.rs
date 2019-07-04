@@ -267,7 +267,7 @@ mod tests {
             span_of!(Test, y..),
             offset_of!(Test, y)..mem::size_of::<Test>()
         );
-        
+
         assert_eq!(
             span_of!(Test, z..),
             offset_of!(Test, z)..mem::size_of::<Test>()

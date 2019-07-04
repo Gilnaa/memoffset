@@ -6,7 +6,7 @@ fn main() {
     assert!(version().unwrap().major >= 1);
 
     // Check for a minimum version
-    if version().unwrap() >= Version::parse("1.37.0").unwrap() {
+    if version().unwrap() >= Version::parse("1.36.0").unwrap() {
         println!("cargo:rustc-cfg=memoffset_maybe_uninit");
     }
 }
