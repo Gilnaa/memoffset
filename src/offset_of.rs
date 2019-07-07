@@ -79,7 +79,7 @@ macro_rules! offset_of {
         // See above for a better version that only works with newer Rust.
         let non_null = $crate::ptr::NonNull::<$parent>::dangling();
         #[allow(unused_unsafe)]
-        let base_ptr = unsafe { non_null.as_ref() as *const _ };
+        let base_ptr = unsafe { non_null.as_ref() as *const $parent };
         #[allow(unused_unsafe)]
         let field_ptr = unsafe { &(*base_ptr).$field as *const _ };
         let offset = (field_ptr as usize) - (base_ptr as usize);
