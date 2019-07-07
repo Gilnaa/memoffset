@@ -89,25 +89,41 @@ macro_rules! offset_of {
 
 #[cfg(test)]
 mod tests {
-    #[repr(C, packed)]
-    struct Foo {
-        a: u32,
-        b: [u8; 4],
-        c: i64,
-    }
-
     #[test]
     fn offset_simple() {
+        #[repr(C)]
+        struct Foo {
+            a: u32,
+            b: [u8; 2],
+            c: i64,
+        }
+
         assert_eq!(offset_of!(Foo, a), 0);
         assert_eq!(offset_of!(Foo, b), 4);
         assert_eq!(offset_of!(Foo, c), 8);
     }
 
     #[test]
-    fn tuple_struct() {
+    #[cfg(not(miri))] // this creates unaligned references
+    fn offset_simple_packed() {
         #[repr(C, packed)]
+        struct Foo {
+            a: u32,
+            b: [u8; 2],
+            c: i64,
+        }
+
+        assert_eq!(offset_of!(Foo, a), 0);
+        assert_eq!(offset_of!(Foo, b), 4);
+        assert_eq!(offset_of!(Foo, c), 6);
+    }
+
+    #[test]
+    fn tuple_struct() {
+        #[repr(C)]
         struct Tup(i32, i32);
 
         assert_eq!(offset_of!(Tup, 0), 0);
+        assert_eq!(offset_of!(Tup, 1), 4);
     }
 }
