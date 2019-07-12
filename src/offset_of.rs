@@ -43,32 +43,46 @@
 #[macro_export]
 #[cfg(memoffset_maybe_uninit)]
 macro_rules! offset_of {
-    ($parent:tt, $field:tt) => (unsafe {
+    ($parent:tt, $field:tt) => {{
+        // Make sure the field actually exists. This line ensures that a
+        // compile-time error is generated if $field is accessed through a
+        // Deref impl.
+        let $parent { $field: _, .. };
+
         // Create an instance of the container and calculate the offset to its field.
         // Here we're using an uninitialized instance of $parent.
-        // Since we're not using its field, there's no UB caused by reading uninitialized memoty.
+        // Since we're not using its field, there's no UB caused by reading uninitialized memory.
         // There *IS*, though, UB caused by creating references to uninitialized data,
         // which is illegal since the compiler is allowed to assume that a reference
         // points to valid data.
-        // AFAIK we cannot avoid UB completely.
+        // However, currently we just cannot avoid UB completely.
         let val = $crate::mem::MaybeUninit::<$parent>::uninit();
-        let &$parent { $field: ref f, .. } = &*val.as_ptr();
-        (f as *const _ as *const u8 as usize) - (val.as_ptr() as *const u8 as usize)
-    });
+        let base_ptr = val.as_ptr();
+        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
+        let field_ptr = unsafe { &(*base_ptr).$field as *const _ };
+        let offset = (field_ptr as usize) - (base_ptr as usize);
+        offset
+    }};
 }
 
 #[macro_export]
 #[cfg(not(memoffset_maybe_uninit))]
 macro_rules! offset_of {
-    ($parent:ty, $field:tt) => {{
+    ($parent:tt, $field:tt) => {{
+        // Make sure the field actually exists. This line ensures that a
+        // compile-time error is generated if $field is accessed through a
+        // Deref impl.
+        let $parent { $field: _, .. };
+
         // This is UB since we're dealing with dangling references.
         // We're never dereferencing it, but it's UB nonetheless.
-        // AFAIK we cannot avoid UB completely.
+        // See above for a better version that only works with newer Rust.
         let non_null = $crate::ptr::NonNull::<$parent>::dangling();
-        let base_ptr = unsafe { non_null.as_ref() };
         #[allow(unused_unsafe)]
-        let field_ptr = unsafe { &base_ptr.$field };
-        let offset = (field_ptr as *const _ as usize) - (base_ptr as *const _ as usize);
+        let base_ptr = unsafe { non_null.as_ref() as *const $parent };
+        #[allow(unused_unsafe)]
+        let field_ptr = unsafe { &(*base_ptr).$field as *const _ };
+        let offset = (field_ptr as usize) - (base_ptr as usize);
         offset
     }};
 }
