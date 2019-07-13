@@ -76,7 +76,7 @@ macro_rules! field_check {
 #[macro_export]
 macro_rules! offset_of {
     ($parent:tt, $field:tt) => {{
-        field_check!($parent, $field);
+        $crate::field_check!($parent, $field);
 
         // Get a base pointer.
         $crate::let_base_ptr!(base_ptr, $parent);

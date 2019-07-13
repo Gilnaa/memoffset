@@ -52,22 +52,26 @@
 /// #[macro_use]
 /// extern crate memoffset;
 ///
-/// #[repr(C, packed)]
+/// #[repr(C)]
 /// struct Florp {
 ///     a: u32
 /// }
 ///
-/// #[repr(C, packed)]
+/// #[repr(C)]
 /// struct Blarg {
-///     x: u64,
+///     x: [u32; 2],
 ///     y: [u8; 56],
 ///     z: Florp,
 ///     egg: [[u8; 4]; 4]
 /// }
 ///
 /// fn main() {
+///     assert_eq!(0..84,  span_of!(Blarg, ..));
+///     assert_eq!(0..8,   span_of!(Blarg, .. y));
+///     assert_eq!(0..64,  span_of!(Blarg, ..= y));
 ///     assert_eq!(0..8,   span_of!(Blarg, x));
 ///     assert_eq!(8..84,  span_of!(Blarg, y ..));
+///     assert_eq!(0..8,   span_of!(Blarg, x .. y));
 ///     assert_eq!(0..64,  span_of!(Blarg, x ..= y));
 /// }
 /// ```
@@ -87,30 +91,30 @@ macro_rules! span_of {
          $root as usize + $crate::mem::size_of_val(&(*$root)))
     }};
     (@helper $root:ident, $parent:tt, [] ..= $field:tt) => {{
-        field_check!($parent, $field);
+        $crate::field_check!($parent, $field);
         ($root as usize,
          &(*$root).$field as *const _ as usize + $crate::mem::size_of_val(&(*$root).$field))
     }};
     (@helper $root:ident, $parent:tt, [] .. $field:tt) => {{
-        field_check!($parent, $field);
+        $crate::field_check!($parent, $field);
         ($root as usize, &(*$root).$field as *const _ as usize)
     }};
     // Explicit begin and end for range.
     (@helper $root:ident, $parent:tt, # $begin:tt [] ..= $end:tt) => {{
-        field_check!($parent, $begin);
-        field_check!($parent, $end);
+        $crate::field_check!($parent, $begin);
+        $crate::field_check!($parent, $end);
         (&(*$root).$begin as *const _ as usize,
          &(*$root).$end as *const _ as usize + $crate::mem::size_of_val(&(*$root).$end))
     }};
     (@helper $root:ident, $parent:tt, # $begin:tt [] .. $end:tt) => {{
-        field_check!($parent, $begin);
-        field_check!($parent, $end);
+        $crate::field_check!($parent, $begin);
+        $crate::field_check!($parent, $end);
         (&(*$root).$begin as *const _ as usize,
          &(*$root).$end as *const _ as usize)
     }};
     // No explicit end for range.
     (@helper $root:ident, $parent:tt, # $begin:tt [] ..) => {{
-        field_check!($parent, $begin);
+        $crate::field_check!($parent, $begin);
         (&(*$root).$begin as *const _ as usize,
          $root as usize + $crate::mem::size_of_val(&*$root))
     }};
@@ -120,16 +124,16 @@ macro_rules! span_of {
     }};
     // Just one field.
     (@helper $root:ident, $parent:tt, # $begin:tt []) => {{
-        field_check!($parent, $begin);
+        $crate::field_check!($parent, $begin);
         (&(*$root).$begin as *const _ as usize,
          &(*$root).$begin as *const _ as usize + $crate::mem::size_of_val(&(*$root).$begin))
     }};
     // Parsing.
     (@helper $root:ident, $parent:tt, $(# $begin:tt)+ [] $tt:tt $($rest:tt)*) => {{
-        span_of!(@helper $root, $parent, $(#$begin)* #$tt [] $($rest)*)
+        $crate::span_of!(@helper $root, $parent, $(#$begin)* #$tt [] $($rest)*)
     }};
     (@helper $root:ident, $parent:tt, [] $tt:tt $($rest:tt)*) => {{
-        span_of!(@helper $root, $parent, #$tt [] $($rest)*)
+        $crate::span_of!(@helper $root, $parent, #$tt [] $($rest)*)
     }};
 
     // Entry point.
@@ -138,7 +142,7 @@ macro_rules! span_of {
             // Get a base pointer.
             $crate::let_base_ptr!(root, $sty);
             let base = root as usize;
-            let (begin, end) = span_of!(@helper root, $sty, [] $($exp)*);
+            let (begin, end) = $crate::span_of!(@helper root, $sty, [] $($exp)*);
             begin-base..end-base
         }
     });
