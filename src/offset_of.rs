@@ -76,10 +76,10 @@ macro_rules! field_check {
 #[macro_export]
 macro_rules! offset_of {
     ($parent:tt, $field:tt) => {{
-        $crate::field_check!($parent, $field);
+        field_check!($parent, $field);
 
         // Get a base pointer.
-        $crate::let_base_ptr!(base_ptr, $parent);
+        let_base_ptr!(base_ptr, $parent);
         // Get the field address. This is UB because we are creating a reference to
         // the uninitialized field.
         #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
