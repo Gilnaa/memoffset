@@ -148,33 +148,48 @@ macro_rules! span_of {
 mod tests {
     use core::mem;
 
-    #[repr(C, packed)]
-    struct Foo {
-        a: u32,
-        b: [u8; 4],
-        c: i64,
+    #[test]
+    fn span_simple() {
+        #[repr(C)]
+        struct Foo {
+            a: u32,
+            b: [u8; 2],
+            c: i64,
+        }
+
+        assert_eq!(span_of!(Foo, a), 0..4);
+        assert_eq!(span_of!(Foo, b), 4..6);
+        assert_eq!(span_of!(Foo, c), 8..8+8);
     }
 
     #[test]
-    fn span_simple() {
+    #[cfg(not(miri))] // this creates unaligned references
+    fn span_simple_packed() {
+        #[repr(C, packed)]
+        struct Foo {
+            a: u32,
+            b: [u8; 2],
+            c: i64,
+        }
+
         assert_eq!(span_of!(Foo, a), 0..4);
-        assert_eq!(span_of!(Foo, b), 4..8);
-        assert_eq!(span_of!(Foo, c), 8..16);
+        assert_eq!(span_of!(Foo, b), 4..6);
+        assert_eq!(span_of!(Foo, c), 6..6+8);
     }
 
     #[test]
     fn span_forms() {
-        #[repr(C, packed)]
+        #[repr(C)]
         struct Florp {
             a: u32,
         }
 
-        #[repr(C, packed)]
+        #[repr(C)]
         struct Blarg {
             x: u64,
             y: [u8; 56],
             z: Florp,
-            egg: [[u8; 4]; 4],
+            egg: [[u8; 4]; 5],
         }
 
         // Love me some brute force
