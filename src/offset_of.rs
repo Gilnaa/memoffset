@@ -42,6 +42,18 @@ macro_rules! let_base_ptr {
     }
 }
 
+/// Deref-coercion protection macro.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! field_check {
+    ($type:tt, $field:tt) => {
+        // Make sure the field actually exists. This line ensures that a
+        // compile-time error is generated if $field is accessed through a
+        // Deref impl.
+        let $type { $field: _, .. };
+    }
+}
+
 /// Calculates the offset of the specified field from the start of the struct.
 /// This macro supports arbitrary amount of subscripts and recursive member-accesses.
 ///
@@ -67,10 +79,7 @@ macro_rules! let_base_ptr {
 #[macro_export]
 macro_rules! offset_of {
     ($parent:tt, $field:tt) => {{
-        // Make sure the field actually exists. This line ensures that a
-        // compile-time error is generated if $field is accessed through a
-        // Deref impl.
-        let $parent { $field: _, .. };
+        field_check!($parent, $field);
 
         // Get a base pointer.
         $crate::let_base_ptr!(base_ptr, $parent);

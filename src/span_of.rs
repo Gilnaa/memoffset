@@ -89,46 +89,46 @@ macro_rules! span_of {
     };
     // Lots of UB due to taking references to uninitialized fields! But that can currently
     // not be avoided.
-    (@helper $root:ident, [] ..= $($field:tt)+) => {
+    (@helper $root:ident, $parent:tt, [] ..= $($field:tt)*) => {{
         ($root as usize,
          &(*$root).$($field)* as *const _ as usize + $crate::mem::size_of_val(&(*$root).$($field)*))
-    };
-    (@helper $root:ident, [] .. $($field:tt)+) => {
+    }};
+    (@helper $root:ident, $parent:tt, [] .. $($field:tt)+) => {{
         ($root as usize, &(*$root).$($field)* as *const _ as usize)
-    };
-    (@helper $root:ident, $(# $begin:tt)+ [] ..= $($end:tt)+) => {
+    }};
+    (@helper $root:ident, $parent:tt, $(# $begin:tt)+ [] ..= $($end:tt)+) => {{
         (&(*$root).$($begin)* as *const _ as usize,
          &(*$root).$($end)* as *const _ as usize + $crate::mem::size_of_val(&(*$root).$($end)*))
-    };
-    (@helper $root:ident, $(# $begin:tt)+ [] .. $($end:tt)+) => {
+    }};
+    (@helper $root:ident, $parent:tt, $(# $begin:tt)+ [] .. $($end:tt)+) => {{
         (&(*$root).$($begin)* as *const _ as usize,
          &(*$root).$($end)* as *const _ as usize)
-    };
-    (@helper $root:ident, $(# $begin:tt)+ [] ..) => {
+    }};
+    (@helper $root:ident, $parent:tt, $(# $begin:tt)+ [] ..) => {{
         (&(*$root).$($begin)* as *const _ as usize,
          $root as usize + $crate::mem::size_of_val(&*$root))
-    };
-    (@helper $root:ident, $(# $begin:tt)+ [] ..=) => {
+    }};
+    (@helper $root:ident, $parent:tt, $(# $begin:tt)+ [] ..=) => {{
         compile_error!(
             "Found inclusive range to the end of a struct. Did you mean '..' instead of '..='?")
-    };
-    (@helper $root:ident, $(# $begin:tt)+ []) => {
+    }};
+    (@helper $root:ident, $parent:tt, $(# $begin:tt)+ []) => {{
         (&(*$root).$($begin)* as *const _ as usize,
          &(*$root).$($begin)* as *const _ as usize + $crate::mem::size_of_val(&(*$root).$($begin)*))
-    };
-    (@helper $root:ident, $(# $begin:tt)+ [] $tt:tt $($rest:tt)*) => {
-        span_of!(@helper $root, $(#$begin)* #$tt [] $($rest)*)
-    };
-    (@helper $root:ident, [] $tt:tt $($rest:tt)*) => {
-        span_of!(@helper $root, #$tt [] $($rest)*)
-    };
+    }};
+    (@helper $root:ident, $parent:tt, $(# $begin:tt)+ [] $tt:tt $($rest:tt)*) => {{
+        span_of!(@helper $root, $parent, $(#$begin)* #$tt [] $($rest)*)
+    }};
+    (@helper $root:ident, $parent:tt, [] $tt:tt $($rest:tt)*) => {{
+        span_of!(@helper $root, $parent, #$tt [] $($rest)*)
+    }};
 
     ($sty:tt, $($exp:tt)+) => ({
         unsafe {
             // Get a base pointer.
             $crate::let_base_ptr!(root, $sty);
             let base = root as usize;
-            let (begin, end) = span_of!(@helper root, [] $($exp)*);
+            let (begin, end) = span_of!(@helper root, $sty, [] $($exp)*);
             begin-base..end-base
         }
     });
