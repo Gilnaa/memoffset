@@ -22,11 +22,10 @@
 ///
 /// This macro provides 2 forms of differing functionalities.
 ///
-/// The first form is identical to the appearance of the `offset_of!` macro,
-/// and just like `offset_of!`, it has no limit on the depth of fields / subscripts used.
+/// The first form is identical to the appearance of the `offset_of!` macro.
 ///
 /// ```ignore
-/// span_of!(Struct, member[index].field)
+/// span_of!(Struct, member)
 /// ```
 ///
 /// The second form of `span_of!` returns a sub-slice which starts at one field, and ends at another.
@@ -44,11 +43,9 @@
 /// ```
 ///
 /// *Note*:
-/// This macro uses recursion in order to resolve the range expressions, so there is a limit to the complexity of the expression.
+/// This macro uses recursion in order to resolve the range expressions, so there is a limit to
+/// the complexity of the expression.
 /// In order to raise the limit, the compiler's recursion limit should be lifted.
-///
-/// *Note*:
-/// This macro may not make much sense when used on structs that are not `#[repr(C, packed)]`
 ///
 /// ## Examples
 /// ```
@@ -70,13 +67,8 @@
 ///
 /// fn main() {
 ///     assert_eq!(0..8,   span_of!(Blarg, x));
-///     assert_eq!(64..68, span_of!(Blarg, z.a));
-///     assert_eq!(79..80, span_of!(Blarg, egg[2][3]));
-///
-///     assert_eq!(8..64,  span_of!(Blarg, y[0]  ..  z));
-///     assert_eq!(0..42,  span_of!(Blarg, x     ..  y[34]));
-///     assert_eq!(0..64,  span_of!(Blarg, x     ..= y));
-///     assert_eq!(58..68, span_of!(Blarg, y[50] ..= z));
+///     assert_eq!(8..84,  span_of!(Blarg, y ..));
+///     assert_eq!(0..64,  span_of!(Blarg, x ..= y));
 /// }
 /// ```
 #[macro_export]
@@ -89,33 +81,50 @@ macro_rules! span_of {
     };
     // Lots of UB due to taking references to uninitialized fields! But that can currently
     // not be avoided.
-    (@helper $root:ident, $parent:tt, [] ..= $($field:tt)*) => {{
+    // No explicit begin for range.
+    (@helper $root:ident, $parent:tt, [] ..) => {{
         ($root as usize,
-         &(*$root).$($field)* as *const _ as usize + $crate::mem::size_of_val(&(*$root).$($field)*))
+         $root as usize + $crate::mem::size_of_val(&(*$root)))
     }};
-    (@helper $root:ident, $parent:tt, [] .. $($field:tt)+) => {{
-        ($root as usize, &(*$root).$($field)* as *const _ as usize)
+    (@helper $root:ident, $parent:tt, [] ..= $field:tt) => {{
+        field_check!($parent, $field);
+        ($root as usize,
+         &(*$root).$field as *const _ as usize + $crate::mem::size_of_val(&(*$root).$field))
     }};
-    (@helper $root:ident, $parent:tt, $(# $begin:tt)+ [] ..= $($end:tt)+) => {{
-        (&(*$root).$($begin)* as *const _ as usize,
-         &(*$root).$($end)* as *const _ as usize + $crate::mem::size_of_val(&(*$root).$($end)*))
+    (@helper $root:ident, $parent:tt, [] .. $field:tt) => {{
+        field_check!($parent, $field);
+        ($root as usize, &(*$root).$field as *const _ as usize)
     }};
-    (@helper $root:ident, $parent:tt, $(# $begin:tt)+ [] .. $($end:tt)+) => {{
-        (&(*$root).$($begin)* as *const _ as usize,
-         &(*$root).$($end)* as *const _ as usize)
+    // Explicit begin and end for range.
+    (@helper $root:ident, $parent:tt, # $begin:tt [] ..= $end:tt) => {{
+        field_check!($parent, $begin);
+        field_check!($parent, $end);
+        (&(*$root).$begin as *const _ as usize,
+         &(*$root).$end as *const _ as usize + $crate::mem::size_of_val(&(*$root).$end))
     }};
-    (@helper $root:ident, $parent:tt, $(# $begin:tt)+ [] ..) => {{
-        (&(*$root).$($begin)* as *const _ as usize,
+    (@helper $root:ident, $parent:tt, # $begin:tt [] .. $end:tt) => {{
+        field_check!($parent, $begin);
+        field_check!($parent, $end);
+        (&(*$root).$begin as *const _ as usize,
+         &(*$root).$end as *const _ as usize)
+    }};
+    // No explicit end for range.
+    (@helper $root:ident, $parent:tt, # $begin:tt [] ..) => {{
+        field_check!($parent, $begin);
+        (&(*$root).$begin as *const _ as usize,
          $root as usize + $crate::mem::size_of_val(&*$root))
     }};
-    (@helper $root:ident, $parent:tt, $(# $begin:tt)+ [] ..=) => {{
+    (@helper $root:ident, $parent:tt, # $begin:tt [] ..=) => {{
         compile_error!(
             "Found inclusive range to the end of a struct. Did you mean '..' instead of '..='?")
     }};
-    (@helper $root:ident, $parent:tt, $(# $begin:tt)+ []) => {{
-        (&(*$root).$($begin)* as *const _ as usize,
-         &(*$root).$($begin)* as *const _ as usize + $crate::mem::size_of_val(&(*$root).$($begin)*))
+    // Just one field.
+    (@helper $root:ident, $parent:tt, # $begin:tt []) => {{
+        field_check!($parent, $begin);
+        (&(*$root).$begin as *const _ as usize,
+         &(*$root).$begin as *const _ as usize + $crate::mem::size_of_val(&(*$root).$begin))
     }};
+    // Parsing.
     (@helper $root:ident, $parent:tt, $(# $begin:tt)+ [] $tt:tt $($rest:tt)*) => {{
         span_of!(@helper $root, $parent, $(#$begin)* #$tt [] $($rest)*)
     }};
@@ -123,6 +132,7 @@ macro_rules! span_of {
         span_of!(@helper $root, $parent, #$tt [] $($rest)*)
     }};
 
+    // Entry point.
     ($sty:tt, $($exp:tt)+) => ({
         unsafe {
             // Get a base pointer.
@@ -153,11 +163,6 @@ mod tests {
     }
 
     #[test]
-    fn span_index() {
-        assert_eq!(span_of!(Foo, b[1]), 5..6);
-    }
-
-    #[test]
     fn span_forms() {
         #[repr(C, packed)]
         struct Florp {
@@ -174,13 +179,11 @@ mod tests {
 
         // Love me some brute force
         assert_eq!(0..8, span_of!(Blarg, x));
-        assert_eq!(64..68, span_of!(Blarg, z.a));
-        assert_eq!(79..80, span_of!(Blarg, egg[2][3]));
+        assert_eq!(64..68, span_of!(Blarg, z));
+        assert_eq!(68..mem::size_of::<Blarg>(), span_of!(Blarg, egg));
 
-        assert_eq!(8..64, span_of!(Blarg, y[0]..z));
-        assert_eq!(0..42, span_of!(Blarg, x..y[34]));
+        assert_eq!(8..64, span_of!(Blarg, y..z));
         assert_eq!(0..64, span_of!(Blarg, x..=y));
-        assert_eq!(58..68, span_of!(Blarg, y[50]..=z));
     }
 
     #[test]
@@ -202,18 +205,11 @@ mod tests {
         assert_eq!(span_of!(Test, ..=x), 0..8);
         assert_eq!(span_of!(Test, ..y), 0..8);
         assert_eq!(span_of!(Test, ..=y), 0..64);
-        assert_eq!(span_of!(Test, ..y[0]), 0..8);
-        assert_eq!(span_of!(Test, ..=y[0]), 0..9);
         assert_eq!(span_of!(Test, ..z), 0..64);
         assert_eq!(span_of!(Test, ..=z), 0..68);
-        assert_eq!(span_of!(Test, ..z.foo), 0..64);
-        assert_eq!(span_of!(Test, ..=z.foo), 0..68);
         assert_eq!(span_of!(Test, ..egg), 0..68);
         assert_eq!(span_of!(Test, ..=egg), 0..84);
-        assert_eq!(span_of!(Test, ..egg[0]), 0..68);
-        assert_eq!(span_of!(Test, ..=egg[0]), 0..72);
-        assert_eq!(span_of!(Test, ..egg[0][0]), 0..68);
-        assert_eq!(span_of!(Test, ..=egg[0][0]), 0..69);
+        assert_eq!(span_of!(Test, ..), 0..mem::size_of::<Test>());
         assert_eq!(
             span_of!(Test, x..),
             offset_of!(Test, x)..mem::size_of::<Test>()
@@ -238,10 +234,6 @@ mod tests {
         assert_eq!(
             span_of!(Test, x..=y),
             offset_of!(Test, x)..offset_of!(Test, y) + mem::size_of::<[u8; 56]>()
-        );
-        assert_eq!(
-            span_of!(Test, x..=y[4]),
-            offset_of!(Test, x)..offset_of!(Test, y) + mem::size_of::<[u8; 5]>()
         );
     }
 }

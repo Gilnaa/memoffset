@@ -55,9 +55,6 @@ macro_rules! field_check {
 }
 
 /// Calculates the offset of the specified field from the start of the struct.
-/// This macro supports arbitrary amount of subscripts and recursive member-accesses.
-///
-/// *Note*: This macro may not make much sense when used on structs that are not `#[repr(C, packed)]`
 ///
 /// ## Examples
 /// ```
