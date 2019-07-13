@@ -163,7 +163,7 @@ mod tests {
 
         assert_eq!(span_of!(Foo, a), 0..4);
         assert_eq!(span_of!(Foo, b), 4..6);
-        assert_eq!(span_of!(Foo, c), 8..8+8);
+        assert_eq!(span_of!(Foo, c), 8..8 + 8);
     }
 
     #[test]
@@ -178,7 +178,7 @@ mod tests {
 
         assert_eq!(span_of!(Foo, a), 0..4);
         assert_eq!(span_of!(Foo, b), 4..6);
-        assert_eq!(span_of!(Foo, c), 6..6+8);
+        assert_eq!(span_of!(Foo, c), 6..6 + 8);
     }
 
     #[test]

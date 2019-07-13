@@ -28,7 +28,7 @@ macro_rules! let_base_ptr {
         // No UB here, and the pointer does not dangle, either.
         let uninit = $crate::mem::MaybeUninit::<$type>::uninit();
         let $name = uninit.as_ptr();
-    }
+    };
 }
 #[cfg(not(memoffset_maybe_uninit))]
 #[macro_export]
@@ -39,7 +39,7 @@ macro_rules! let_base_ptr {
         // of this pointer, and that is UB when the pointer is dangling.
         let non_null = $crate::ptr::NonNull::<$type>::dangling();
         let $name = non_null.as_ptr() as *const $type;
-    }
+    };
 }
 
 /// Deref-coercion protection macro.
@@ -51,7 +51,7 @@ macro_rules! field_check {
         // compile-time error is generated if $field is accessed through a
         // Deref impl.
         let $type { $field: _, .. };
-    }
+    };
 }
 
 /// Calculates the offset of the specified field from the start of the struct.
