@@ -18,6 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+/// Reexport for `local_inner_macros`; see
+/// <https://doc.rust-lang.org/edition-guide/rust-2018/macros/macro-changes.html#macros-using-local_inner_macros>.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! _memoffset__compile_error {
+    ($($inner:tt)*) => {
+        compile_error! { $($inner)* }
+    }
+}
+
 /// Produces a range instance representing the sub-slice containing the specified member.
 ///
 /// This macro provides 2 forms of differing functionalities.
@@ -75,13 +85,13 @@
 ///     assert_eq!(0..64,  span_of!(Blarg, x ..= y));
 /// }
 /// ```
-#[macro_export]
+#[macro_export(local_inner_macros)]
 macro_rules! span_of {
     (@helper  $root:ident, [] ..=) => {
-        compile_error!("Expected a range, found '..='")
+        _memoffset__compile_error!("Expected a range, found '..='")
     };
     (@helper $root:ident, [] ..) => {
-        compile_error!("Expected a range, found '..'")
+        _memoffset__compile_error!("Expected a range, found '..'")
     };
     // Lots of UB due to taking references to uninitialized fields! But that can currently
     // not be avoided.
@@ -91,40 +101,40 @@ macro_rules! span_of {
          $root as usize + $crate::mem::size_of_val(&(*$root)))
     }};
     (@helper $root:ident, $parent:tt, [] ..= $field:tt) => {{
-        field_check!($parent, $field);
+        _memoffset__field_check!($parent, $field);
         ($root as usize,
          &(*$root).$field as *const _ as usize + $crate::mem::size_of_val(&(*$root).$field))
     }};
     (@helper $root:ident, $parent:tt, [] .. $field:tt) => {{
-        field_check!($parent, $field);
+        _memoffset__field_check!($parent, $field);
         ($root as usize, &(*$root).$field as *const _ as usize)
     }};
     // Explicit begin and end for range.
     (@helper $root:ident, $parent:tt, # $begin:tt [] ..= $end:tt) => {{
-        field_check!($parent, $begin);
-        field_check!($parent, $end);
+        _memoffset__field_check!($parent, $begin);
+        _memoffset__field_check!($parent, $end);
         (&(*$root).$begin as *const _ as usize,
          &(*$root).$end as *const _ as usize + $crate::mem::size_of_val(&(*$root).$end))
     }};
     (@helper $root:ident, $parent:tt, # $begin:tt [] .. $end:tt) => {{
-        field_check!($parent, $begin);
-        field_check!($parent, $end);
+        _memoffset__field_check!($parent, $begin);
+        _memoffset__field_check!($parent, $end);
         (&(*$root).$begin as *const _ as usize,
          &(*$root).$end as *const _ as usize)
     }};
     // No explicit end for range.
     (@helper $root:ident, $parent:tt, # $begin:tt [] ..) => {{
-        field_check!($parent, $begin);
+        _memoffset__field_check!($parent, $begin);
         (&(*$root).$begin as *const _ as usize,
          $root as usize + $crate::mem::size_of_val(&*$root))
     }};
     (@helper $root:ident, $parent:tt, # $begin:tt [] ..=) => {{
-        compile_error!(
+        _memoffset__compile_error!(
             "Found inclusive range to the end of a struct. Did you mean '..' instead of '..='?")
     }};
     // Just one field.
     (@helper $root:ident, $parent:tt, # $begin:tt []) => {{
-        field_check!($parent, $begin);
+        _memoffset__field_check!($parent, $begin);
         (&(*$root).$begin as *const _ as usize,
          &(*$root).$begin as *const _ as usize + $crate::mem::size_of_val(&(*$root).$begin))
     }};
@@ -140,7 +150,7 @@ macro_rules! span_of {
     ($sty:tt, $($exp:tt)+) => ({
         unsafe {
             // Get a base pointer.
-            let_base_ptr!(root, $sty);
+            _memoffset__let_base_ptr!(root, $sty);
             let base = root as usize;
             let (begin, end) = span_of!(@helper root, $sty, [] $($exp)*);
             begin-base..end-base

@@ -23,7 +23,7 @@
 #[cfg(memoffset_maybe_uninit)]
 #[macro_export]
 #[doc(hidden)]
-macro_rules! let_base_ptr {
+macro_rules! _memoffset__let_base_ptr {
     ($name:ident, $type:tt) => {
         // No UB here, and the pointer does not dangle, either.
         // But we have to make sure that `uninit` lives long enough,
@@ -37,7 +37,7 @@ macro_rules! let_base_ptr {
 #[cfg(not(memoffset_maybe_uninit))]
 #[macro_export]
 #[doc(hidden)]
-macro_rules! let_base_ptr {
+macro_rules! _memoffset__let_base_ptr {
     ($name:ident, $type:tt) => {
         // No UB right here, but we will later offset into a field
         // of this pointer, and that is UB when the pointer is dangling.
@@ -49,7 +49,7 @@ macro_rules! let_base_ptr {
 /// Deref-coercion protection macro.
 #[macro_export]
 #[doc(hidden)]
-macro_rules! field_check {
+macro_rules! _memoffset__field_check {
     ($type:tt, $field:tt) => {
         // Make sure the field actually exists. This line ensures that a
         // compile-time error is generated if $field is accessed through a
@@ -77,13 +77,13 @@ macro_rules! field_check {
 ///     assert_eq!(offset_of!(Foo, b), 4);
 /// }
 /// ```
-#[macro_export]
+#[macro_export(local_inner_macros)]
 macro_rules! offset_of {
     ($parent:tt, $field:tt) => {{
-        field_check!($parent, $field);
+        _memoffset__field_check!($parent, $field);
 
         // Get a base pointer.
-        let_base_ptr!(base_ptr, $parent);
+        _memoffset__let_base_ptr!(base_ptr, $parent);
         // Get the field address. This is UB because we are creating a reference to
         // the uninitialized field.
         #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
