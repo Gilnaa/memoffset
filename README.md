@@ -18,7 +18,7 @@ Add the following dependency to your `Cargo.toml`:
 memoffset = "0.5"
 ```
 
-These versions will compile fine with rustc versions greater or equal to 1.25.
+These versions will compile fine with rustc versions greater or equal to 1.20.
 
 Add the following lines at the top of your `main.rs` or `lib.rs` files.
 
