@@ -12,5 +12,5 @@ categories = ["no-std"]
 [build-dependencies]
 rustc_version = "0.2.3"
 
-[dev-dependencies]
+[dependencies]
 doc-comment = "0.3"
