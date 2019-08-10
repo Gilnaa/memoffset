@@ -9,7 +9,6 @@ rust:
 matrix:
   include:
   - env: RUSTFMT
-    rust: 1.25.0
     rust: 1.36.0
     install:
     - rustup component add rustfmt-preview
