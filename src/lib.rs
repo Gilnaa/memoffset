@@ -61,6 +61,15 @@
 //! ```
 
 #![no_std]
+#![cfg_attr(memoffset_nightly, feature(cfg_doctest))]
+
+#[macro_use]
+#[cfg(memoffset_nightly)]
+#[cfg(doctest)]
+extern crate doc_comment;
+#[cfg(memoffset_nightly)]
+#[cfg(doctest)]
+doctest!("../README.md");
 
 // This `use` statement enables the macros to use `$crate::mem`.
 // Doing this enables this crate to function under both std and no-std crates.

@@ -1,7 +1,7 @@
 sudo: false
 language: rust
 rust:
-  - 1.25.0  # Oldest supported
+  - 1.20.0  # Oldest supported
   - 1.36.0  # Oldest supported with MaybeUninit
   - stable
   - beta
@@ -9,18 +9,15 @@ rust:
 matrix:
   include:
   - env: RUSTFMT
-    rust: 1.25.0
     rust: 1.36.0
     install:
-    - rustup component add rustfmt-preview
+    - rustup component add rustfmt
     script:
     - cargo fmt -- --check
   - env: RUSTFLAGS="-D warnings"
     rust: 1.33.0  # `stable`: Locking down for consistent behavior
     script:
     - cargo check --tests
-  allow_failures:
-    - rust: nightly
   fast_finish: true
 
 install:

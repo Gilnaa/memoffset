@@ -39,10 +39,9 @@ macro_rules! _memoffset__let_base_ptr {
 #[doc(hidden)]
 macro_rules! _memoffset__let_base_ptr {
     ($name:ident, $type:tt) => {
-        // No UB right here, but we will later offset into a field
-        // of this pointer, and that is UB when the pointer is dangling.
-        let non_null = $crate::ptr::NonNull::<$type>::dangling();
-        let $name = non_null.as_ptr() as *const $type;
+        // No UB right here, but we will later dereference this pointer to
+        // offset into a field, and that is UB when the pointer is dangling.
+        let $name = $crate::mem::align_of::<$type>() as *const $type;
     };
 }
 
