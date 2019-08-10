@@ -18,8 +18,6 @@ matrix:
     rust: 1.33.0  # `stable`: Locking down for consistent behavior
     script:
     - cargo check --tests
-  allow_failures:
-    - rust: nightly
   fast_finish: true
 
 install:
