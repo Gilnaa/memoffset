@@ -1,7 +1,7 @@
 sudo: false
 language: rust
 rust:
-  - 1.25.0  # Oldest supported
+  - 1.25.0  # Oldest supported (to make doc-comment not ICE)
   - 1.36.0  # Oldest supported with MaybeUninit
   - stable
   - beta
