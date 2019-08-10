@@ -1,5 +1,5 @@
 extern crate rustc_version;
-use rustc_version::{version, version_meta, Version, Channel};
+use rustc_version::{version, version_meta, Channel, Version};
 
 fn main() {
     // Assert we haven't travelled back in time

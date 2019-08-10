@@ -61,10 +61,7 @@
 //! ```
 
 #![no_std]
-#![cfg_attr(
-    memoffset_nightly,
-    feature(cfg_doctest)
-)]
+#![cfg_attr(memoffset_nightly, feature(cfg_doctest))]
 
 #[macro_use]
 #[cfg(memoffset_nightly)]
