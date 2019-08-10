@@ -62,6 +62,13 @@
 
 #![no_std]
 
+#[cfg(test)]
+#[macro_use]
+extern crate doc_comment;
+
+#[cfg(test)]
+doctest!("../README.md");
+
 // This `use` statement enables the macros to use `$crate::mem`.
 // Doing this enables this crate to function under both std and no-std crates.
 #[doc(hidden)]
