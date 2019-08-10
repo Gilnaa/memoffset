@@ -11,7 +11,7 @@ matrix:
   - env: RUSTFMT
     rust: 1.36.0
     install:
-    - rustup component add rustfmt-preview
+    - rustup component add rustfmt
     script:
     - cargo fmt -- --check
   - env: RUSTFLAGS="-D warnings"
