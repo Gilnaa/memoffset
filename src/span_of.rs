@@ -100,26 +100,34 @@ macro_rules! span_of {
          $root as usize + $crate::mem::size_of_val(&(*$root)))
     }};
     (@helper $root:ident, $parent:path, [] ..= $field:tt) => {{
+        _memoffset__field_check!($parent, $field);
+
         // UB due to taking references to uninitialized fields for `size_of_val`.
         ($root as usize,
          raw_field!($root, $parent, $field) as usize + $crate::mem::size_of_val(&(*$root).$field))
     }};
     (@helper $root:ident, $parent:path, [] .. $field:tt) => {{
+        _memoffset__field_check!($parent, $field);
         ($root as usize, raw_field!($root, $parent, $field) as usize)
     }};
     // Explicit begin and end for range.
     (@helper $root:ident, $parent:path, # $begin:tt [] ..= $end:tt) => {{
+        _memoffset__field_check!($parent, $begin);
+        _memoffset__field_check!($parent, $end);
         // UB due to taking references to uninitialized fields for `size_of_val`.
         (raw_field!($root, $parent, $begin) as usize,
          raw_field!($root, $parent, $end) as usize + $crate::mem::size_of_val(&(*$root).$end))
     }};
     (@helper $root:ident, $parent:path, # $begin:tt [] .. $end:tt) => {{
+        _memoffset__field_check!($parent, $begin);
+        _memoffset__field_check!($parent, $end);
         (raw_field!($root, $parent, $begin) as usize,
          raw_field!($root, $parent, $end) as usize)
     }};
     // No explicit end for range.
     (@helper $root:ident, $parent:path, # $begin:tt [] ..) => {{
         // UB due to taking references to uninitialized fields for `size_of_val`.
+        _memoffset__field_check!($parent, $begin);
         (raw_field!($root, $parent, $begin) as usize,
          $root as usize + $crate::mem::size_of_val(&*$root))
     }};
@@ -129,6 +137,8 @@ macro_rules! span_of {
     }};
     // Just one field.
     (@helper $root:ident, $parent:path, # $begin:tt []) => {{
+        _memoffset__field_check!($parent, $begin);
+
         // UB due to taking references to uninitialized fields for `size_of_val`.
         (raw_field!($root, $parent, $begin) as usize,
          raw_field!($root, $parent, $begin) as usize + $crate::mem::size_of_val(&(*$root).$begin))

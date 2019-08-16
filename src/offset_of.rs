@@ -58,6 +58,7 @@ macro_rules! _memoffset_offset_from {
         unsafe { ($field as *const u8).offset_from($base as *const u8) as usize }
     };
 }
+
 #[cfg(not(feature = "unstable_const"))]
 #[macro_export]
 #[doc(hidden)]
@@ -139,76 +140,4 @@ mod tests {
         assert_eq!(offset_of!(Tup, 1), 4);
     }
 
-    #[test]
-    fn path() {
-        mod sub {
-            #[repr(C)]
-            pub struct Foo {
-                pub x: u32,
-            }
-        }
-
-        assert_eq!(offset_of!(sub::Foo, x), 0);
-    }
-
-    #[test]
-    fn inside_generic_method() {
-        struct Pair<T, U>(T, U);
-
-        fn foo<T, U>(_: Pair<T, U>) -> usize {
-            offset_of!(Pair<T, U>, 1)
-        }
-
-        assert_eq!(foo(Pair(0, 0)), 4);
-    }
-
-    #[test]
-    fn test_raw_field() {
-        #[repr(C)]
-        struct Foo {
-            a: u32,
-            b: [u8; 2],
-            c: i64,
-        }
-
-        let f: Foo = Foo {
-            a: 0,
-            b: [0, 0],
-            c: 0,
-        };
-        let f_ptr = &f as *const _;
-        assert_eq!(f_ptr as usize + 0, raw_field!(f_ptr, Foo, a) as usize);
-        assert_eq!(f_ptr as usize + 4, raw_field!(f_ptr, Foo, b) as usize);
-        assert_eq!(f_ptr as usize + 8, raw_field!(f_ptr, Foo, c) as usize);
-    }
-
-    #[cfg(feature = "unstable_const")]
-    #[test]
-    fn const_offset() {
-        #[repr(C)]
-        struct Foo {
-            a: u32,
-            b: [u8; 2],
-            c: i64,
-        }
-
-        assert_eq!([0; offset_of!(Foo, b)].len(), 4);
-    }
-
-    #[cfg(feature = "unstable_const")]
-    #[test]
-    fn const_fn_offset() {
-        const fn test_fn() -> usize {
-            #[repr(C)]
-            struct Foo {
-                a: u32,
-                b: [u8; 2],
-                c: i64,
-            }
-
-            offset_of!(Foo, b)
-        }
-
-        assert_eq!([0; test_fn()].len(), 4);
-    }
 }
