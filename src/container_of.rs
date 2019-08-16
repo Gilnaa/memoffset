@@ -27,8 +27,16 @@
 /// ```
 #[macro_export(local_inner_macros)]
 macro_rules! container_of {
-    ($ptr:expr, $container:path, $field:tt) => {
-        ($ptr as *const _ as *const u8).offset(-(offset_of!($container, $field) as isize))
+    ($ptr:expr, $container:path, $field:tt) => {{
+        let ptr = $ptr as *const _;
+        if false {
+            // Ensure that the pointer has the correct type.
+            let $container { $field: f, .. };
+            f = *ptr;
+        }
+
+        // We don't use .sub because we need to support older Rust versions.
+        (ptr as *const u8).offset((offset_of!($container, $field) as isize).wrapping_neg())
             as *mut $container
-    };
+    }};
 }
