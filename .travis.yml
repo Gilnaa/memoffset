@@ -10,6 +10,12 @@ matrix:
   - rust: beta
   - rust: nightly
 
+  - env: MIRI
+    rust: nightly
+    os: linux
+    script:
+      - sh ci/miri.sh
+
   - env: RUSTFMT
     rust: 1.36.0
     install:
@@ -21,12 +27,6 @@ matrix:
     rust: 1.33.0  # `stable`: Locking down for consistent behavior
     script:
     - cargo check --tests
-
-  - env: MIRI
-    rust: nightly
-    os: linux
-    script:
-      - sh ci/miri.sh
 
 install:
 - rustc -Vv
