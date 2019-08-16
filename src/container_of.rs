@@ -32,7 +32,7 @@ macro_rules! container_of {
         if false {
             // Ensure that the pointer has the correct type.
             let $container { $field: _f, .. };
-            _f = *ptr;
+            _f = $crate::ptr::read(ptr);
         }
 
         // We don't use .sub because we need to support older Rust versions.
@@ -95,6 +95,21 @@ mod tests {
         unsafe {
             assert_eq!(container_of!(&x.0, Tup, 0), &x as *const _);
             assert_eq!(container_of!(&x.1, Tup, 1), &x as *const _);
+        }
+    }
+
+    #[test]
+    fn non_copy() {
+        use core::cell::Cell;
+
+        #[repr(C)]
+        struct Foo {
+            a: Cell<u8>,
+        }
+
+        let x = Foo { a: Cell::new(0) };
+        unsafe {
+            assert_eq!(container_of!(&x.a, Foo, a), &x as *const _);
         }
     }
 }
