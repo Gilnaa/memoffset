@@ -83,3 +83,5 @@ pub use core::ptr;
 mod offset_of;
 #[macro_use]
 mod span_of;
+#[macro_use]
+mod container_of;
