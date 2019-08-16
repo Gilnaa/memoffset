@@ -138,7 +138,9 @@ mod tests {
     fn path() {
         mod sub {
             #[repr(C)]
-            pub struct Foo { pub x: u32 }
+            pub struct Foo {
+                pub x: u32,
+            }
         }
 
         assert_eq!(offset_of!(sub::Foo, x), 0);

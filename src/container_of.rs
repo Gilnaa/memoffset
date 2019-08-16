@@ -1,5 +1,3 @@
-
-
 /// Calculates the address of a containing struct from a pointer to one of its
 /// fields.
 ///
@@ -30,7 +28,7 @@
 #[macro_export(local_inner_macros)]
 macro_rules! container_of {
     ($ptr:expr, $container:path, $field:tt) => {
-        ($ptr as *const _ as *const u8).sub(offset_of!($container, $field))
+        ($ptr as *const _ as *const u8).offset(-(offset_of!($container, $field) as isize))
             as *mut $container
     };
 }
