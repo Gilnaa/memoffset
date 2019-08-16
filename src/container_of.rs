@@ -100,14 +100,14 @@ mod tests {
 
     #[test]
     fn non_copy() {
-        use core::cell::Cell;
+        use core::cell::RefCell;
 
         #[repr(C)]
         struct Foo {
-            a: Cell<u8>,
+            a: RefCell<u8>,
         }
 
-        let x = Foo { a: Cell::new(0) };
+        let x = Foo { a: RefCell::new(0) };
         unsafe {
             assert_eq!(container_of!(&x.a, Foo, a), &x as *const _);
         }
