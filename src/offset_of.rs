@@ -85,6 +85,8 @@ macro_rules! offset_of {
         _memoffset__let_base_ptr!(base_ptr, $parent);
         // Get the field address. This is UB because we are creating a reference to
         // the uninitialized field.
+        // Crucially, we know that this will not trigger a deref coercion because
+        // of the `field_check!` we did above.
         #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
         let field_ptr = unsafe { &(*base_ptr).$field as *const _ };
         let offset = (field_ptr as usize) - (base_ptr as usize);
