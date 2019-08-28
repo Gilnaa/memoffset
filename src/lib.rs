@@ -20,11 +20,10 @@
 
 //! A crate used for calculating offsets of struct members and their spans.
 //!
-//! Some of the funcationality of the crate makes no sense when used along with structs that
+//! Some of the functionality of the crate makes no sense when used along with structs that
 //! are not `#[repr(C, packed)]`, but it is up to the user to make sure that they are.
 //!
-//! This functionality should work for `const`s but presently doesn't work on `const fn`. Storing a
-//! value in a const and then returning it from a `const fn` should workaround most cases.
+//! This functionality currently can not be used in compile time code such as `const` or `const fn` definitions.
 //!
 //! ## Examples
 //! ```
