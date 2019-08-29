@@ -20,9 +20,6 @@
 
 //! A crate used for calculating offsets of struct members and their spans.
 //!
-//! Some of the functionality of the crate makes no sense when used along with structs that
-//! are not `#[repr(C, packed)]`, but it is up to the user to make sure that they are.
-//!
 //! This functionality currently can not be used in compile time code such as `const` or `const fn` definitions.
 //!
 //! ## Examples
