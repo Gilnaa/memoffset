@@ -16,6 +16,14 @@ matrix:
     script:
       - sh ci/miri.sh
 
+  - env: CONST_OFFSET
+    rust: nightly
+    os: linux
+    script:  # `--lib` added to prevent doctests from being compiled.
+             # This is due to `unstable_const` requiring extra `feature(...)` directives
+             # which the doctests do not have.
+      - cargo test --verbose --features unstable_const --lib
+
   - env: RUSTFMT
     rust: 1.36.0
     install:

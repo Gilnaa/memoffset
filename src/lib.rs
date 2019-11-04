@@ -57,6 +57,9 @@
 //! ```
 
 #![no_std]
+#![cfg_attr(feature = "unstable_const", feature(const_ptr_offset_from))]
+#![cfg_attr(feature = "unstable_const", feature(const_transmute))]
+#![cfg_attr(feature = "unstable_const", feature(ptr_offset_from))]
 
 #[macro_use]
 #[cfg(memoffset_doctests)]
