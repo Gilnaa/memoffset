@@ -1,17 +1,18 @@
 extern crate rustc_version;
-use rustc_version::{version, version_meta, Channel, Version};
+use rustc_version::{version, Version};
 
 fn main() {
+    let version = version().unwrap();
+
     // Assert we haven't travelled back in time
-    assert!(version().unwrap().major >= 1);
+    assert!(version.major >= 1);
 
     // Check for a minimum version
-    if version().unwrap() >= Version::parse("1.36.0").unwrap() {
+    if version >= Version::from((1, 36, 0)) {
         println!("cargo:rustc-cfg=memoffset_maybe_uninit");
     }
 
-    // Check for nightly.
-    if let Channel::Nightly = version_meta().unwrap().channel {
-        println!("cargo:rustc-cfg=memoffset_nightly");
+    if version >= Version::from((1, 40, 0)) {
+        println!("cargo:rustc-cfg=memoffset_doctests");
     }
 }
