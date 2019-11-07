@@ -57,13 +57,12 @@
 //! ```
 
 #![no_std]
-#![cfg_attr(memoffset_nightly, feature(cfg_doctest))]
 
 #[macro_use]
-#[cfg(memoffset_nightly)]
+#[cfg(memoffset_doctests)]
 #[cfg(doctest)]
 extern crate doc_comment;
-#[cfg(memoffset_nightly)]
+#[cfg(memoffset_doctests)]
 #[cfg(doctest)]
 doctest!("../README.md");
 
