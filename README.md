@@ -34,20 +34,50 @@ extern crate memoffset;
 
 #[repr(C, packed)]
 struct Foo {
-	a: u32,
-	b: u32,
-	c: [u8; 5],
-	d: u32,
+    a: u32,
+    b: u32,
+    c: [u8; 5],
+    d: u32,
 }
 
 fn main() {
-	assert_eq!(offset_of!(Foo, b), 4);
-	assert_eq!(offset_of!(Foo, d), 4+4+5);
+    assert_eq!(offset_of!(Foo, b), 4);
+    assert_eq!(offset_of!(Foo, d), 4+4+5);
 
-	assert_eq!(span_of!(Foo, a),        0..4);
-	assert_eq!(span_of!(Foo, a ..  c),  0..8);
-	assert_eq!(span_of!(Foo, a ..= c),  0..13);
-	assert_eq!(span_of!(Foo, ..= d),    0..17);
-	assert_eq!(span_of!(Foo, b ..),     4..17);
+    assert_eq!(span_of!(Foo, a),        0..4);
+    assert_eq!(span_of!(Foo, a ..  c),  0..8);
+    assert_eq!(span_of!(Foo, a ..= c),  0..13);
+    assert_eq!(span_of!(Foo, ..= d),    0..17);
+    assert_eq!(span_of!(Foo, b ..),     4..17);
 }
+```
+
+## Usage in constants ##
+`memoffset` has **experimental** support for compile-time `offset_of!` on a nightly compiler.
+
+In order to use it, you must enable the `unstable_const` crate feature and several compiler features.
+
+Cargo.toml:
+```toml
+[dependencies.memoffset]
+version = "0.5"
+features = ["unstable_const"]
+```
+
+Your crate root: (`lib.rs`/`main.rs`)
+```rust,ignore
+#![feature(const_transmute)]
+#![feature(const_ptr_offset_from)]
+#![feature(ptr_offset_from)]
+```
+
+and then:
+
+```rust,ignore
+struct Foo {
+    a: u32,
+    b: u32,
+}
+
+let foo = [0; offset_of!(Foo, b)] 
 ```
