@@ -53,6 +53,7 @@ macro_rules! _memoffset__field_check {
         // Make sure the field actually exists. This line ensures that a
         // compile-time error is generated if $field is accessed through a
         // Deref impl.
+        #[allow(clippy::unneeded_field_pattern)]
         let $type { $field: _, .. };
     };
 }
