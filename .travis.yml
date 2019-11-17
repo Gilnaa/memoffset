@@ -5,6 +5,7 @@ cache:
 matrix:
   include:
   - rust: 1.19.0  # Oldest supported (first version with numeric fields in struct patterns)
+  - rust: 1.31.0  # Oldest supported with allow(clippy)
   - rust: 1.36.0  # Oldest supported with MaybeUninit
   - rust: stable
   - rust: beta
