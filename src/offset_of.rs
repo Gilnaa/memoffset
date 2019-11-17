@@ -20,7 +20,7 @@
 
 /// Macro to create a local `base_ptr` raw pointer of the given type, avoiding UB as
 /// much as is possible currently.
-#[cfg(memoffset_maybe_uninit)]
+#[cfg(maybe_uninit)]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset__let_base_ptr {
@@ -34,7 +34,7 @@ macro_rules! _memoffset__let_base_ptr {
         let $name = uninit.as_ptr();
     };
 }
-#[cfg(not(memoffset_maybe_uninit))]
+#[cfg(not(maybe_uninit))]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset__let_base_ptr {

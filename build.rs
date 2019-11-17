@@ -9,10 +9,10 @@ fn main() {
 
     // Check for a minimum version
     if version >= Version::from((1, 36, 0)) {
-        println!("cargo:rustc-cfg=memoffset_maybe_uninit");
+        println!("cargo:rustc-cfg=maybe_uninit");
     }
 
     if version >= Version::from((1, 40, 0)) {
-        println!("cargo:rustc-cfg=memoffset_doctests");
+        println!("cargo:rustc-cfg=doctests");
     }
 }
