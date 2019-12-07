@@ -62,10 +62,10 @@
 #![cfg_attr(feature = "unstable_const", feature(ptr_offset_from))]
 
 #[macro_use]
-#[cfg(memoffset_doctests)]
+#[cfg(doctests)]
 #[cfg(doctest)]
 extern crate doc_comment;
-#[cfg(memoffset_doctests)]
+#[cfg(doctests)]
 #[cfg(doctest)]
 doctest!("../README.md");
 

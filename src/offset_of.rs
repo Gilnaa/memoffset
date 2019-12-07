@@ -20,7 +20,7 @@
 
 /// Macro to create a local `base_ptr` raw pointer of the given type, avoiding UB as
 /// much as is possible currently.
-#[cfg(memoffset_maybe_uninit)]
+#[cfg(maybe_uninit)]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset__let_base_ptr {
@@ -34,7 +34,7 @@ macro_rules! _memoffset__let_base_ptr {
         let $name = uninit.as_ptr();
     };
 }
-#[cfg(not(memoffset_maybe_uninit))]
+#[cfg(not(maybe_uninit))]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset__let_base_ptr {
@@ -53,6 +53,7 @@ macro_rules! _memoffset__field_check {
         // Make sure the field actually exists. This line ensures that a
         // compile-time error is generated if $field is accessed through a
         // Deref impl.
+        #[cfg_attr(allow_clippy, allow(clippy::unneeded_field_pattern))]
         let $type { $field: _, .. };
     };
 }
