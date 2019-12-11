@@ -177,7 +177,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(not(miri))] // this creates unaligned references
+    #[cfg_attr(miri, ignore)] // this creates unaligned references
     fn span_simple_packed() {
         #[repr(C, packed)]
         struct Foo {
