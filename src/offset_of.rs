@@ -29,7 +29,7 @@ macro_rules! _memoffset__let_base_ptr {
         // But we have to make sure that `uninit` lives long enough,
         // so it has to be in the same scope as `$name`. That's why
         // `let_base_ptr` declares a variable (several, actually)
-        // instad of returning one.
+        // instead of returning one.
         let uninit = $crate::mem::MaybeUninit::<$type>::uninit();
         let $name = uninit.as_ptr();
     };
