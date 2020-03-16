@@ -57,7 +57,15 @@
 //! ```
 
 #![no_std]
-#![cfg_attr(feature = "unstable_const", feature(ptr_offset_from, const_ptr_offset_from, const_transmute, const_raw_ptr_deref))]
+#![cfg_attr(
+    feature = "unstable_const",
+    feature(
+        ptr_offset_from,
+        const_ptr_offset_from,
+        const_transmute,
+        const_raw_ptr_deref
+    )
+)]
 
 #[macro_use]
 #[cfg(doctests)]

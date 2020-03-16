@@ -75,8 +75,10 @@ macro_rules! raw_field {
         // Crucially, we know that this will not trigger a deref coercion because
         // of the `field_check!` we did above.
         #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
-        unsafe { &(*base_ptr).$field as *const _ }
-    }}
+        unsafe {
+            &(*base_ptr).$field as *const _
+        }
+    }};
 }
 
 /// Calculates the offset of the specified field from the start of the struct.
@@ -204,7 +206,11 @@ mod tests {
             c: i64,
         }
 
-        let f: Foo = Foo { a: 0, b: [0, 0], c: 0 };
+        let f: Foo = Foo {
+            a: 0,
+            b: [0, 0],
+            c: 0,
+        };
         let f_ptr = &f as *const _;
         assert_eq!(f_ptr as usize + 0, raw_field!(f_ptr, Foo, a) as usize);
         assert_eq!(f_ptr as usize + 4, raw_field!(f_ptr, Foo, b) as usize);
