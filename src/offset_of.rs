@@ -204,7 +204,7 @@ mod tests {
             c: i64,
         }
 
-        let f: Foo = unsafe { core::mem::zeroed() };
+        let f: Foo = Foo { a: 0, b: [0, 0], c: 0 };
         let f_ptr = &f as *const _;
         assert_eq!(f_ptr as usize + 0, raw_field!(f_ptr, Foo, a) as usize);
         assert_eq!(f_ptr as usize + 4, raw_field!(f_ptr, Foo, b) as usize);
