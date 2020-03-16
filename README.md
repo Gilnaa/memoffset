@@ -66,9 +66,7 @@ features = ["unstable_const"]
 
 Your crate root: (`lib.rs`/`main.rs`)
 ```rust,ignore
-#![feature(const_transmute)]
-#![feature(const_ptr_offset_from)]
-#![feature(ptr_offset_from)]
+#![feature(ptr_offset_from, const_ptr_offset_from, const_transmute, const_raw_ptr_deref)]
 ```
 
 and then:
