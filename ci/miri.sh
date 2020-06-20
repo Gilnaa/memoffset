@@ -8,3 +8,4 @@ rustup component add miri
 cargo miri setup
 
 cargo miri test
+cargo miri test --all-features

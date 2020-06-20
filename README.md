@@ -52,7 +52,9 @@ fn main() {
 }
 ```
 
-## Usage in constants ##
+## Feature flags ##
+
+### Usage in constants ###
 `memoffset` has **experimental** support for compile-time `offset_of!` on a nightly compiler.
 
 In order to use it, you must enable the `unstable_const` crate feature and several compiler features.
@@ -79,3 +81,8 @@ struct Foo {
 
 let foo = [0; offset_of!(Foo, b)] 
 ```
+
+### Raw references ###
+Recent nightlies support [a way to create raw pointers](https://github.com/rust-lang/rust/issues/73394) that avoids creating intermediate safe references.
+`memoffset` can make use of that feature to avoid what is technically Undefined Behavior.
+Use the `unstable_raw` feature to enable this.

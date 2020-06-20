@@ -4,6 +4,12 @@ cache:
   cargo: true
 matrix:
   include:
+  - name: miri
+    rust: nightly
+    os: linux
+    script:
+      - sh ci/miri.sh
+
   - rust: 1.19.0  # Oldest supported (first version with numeric fields in struct patterns)
   - rust: 1.31.0  # Oldest supported with allow(clippy)
   - rust: 1.36.0  # Oldest supported with MaybeUninit
@@ -11,28 +17,23 @@ matrix:
   - rust: beta
   - rust: nightly
 
-  - env: MIRI
-    rust: nightly
-    os: linux
-    script:
-      - sh ci/miri.sh
-
-  - env: CONST_OFFSET
+  - name: all-features
     rust: nightly
     os: linux
     script:  # `--lib` added to prevent doctests from being compiled.
              # This is due to `unstable_const` requiring extra `feature(...)` directives
              # which the doctests do not have.
-      - cargo test --verbose --features unstable_const --lib
+      - cargo test --verbose --all-features --lib
 
-  - env: RUSTFMT
+  - name: rustfmt
     rust: 1.36.0
     install:
     - rustup component add rustfmt
     script:
     - cargo fmt -- --check
 
-  - env: RUSTFLAGS="-D warnings"
+  - name: deny-warnings
+    env: RUSTFLAGS="-D warnings"
     rust: 1.33.0  # `stable`: Locking down for consistent behavior
     script:
     - cargo check --tests

@@ -66,6 +66,7 @@
         const_raw_ptr_deref
     )
 )]
+#![cfg_attr(feature = "unstable_raw", feature(raw_ref_macros))]
 
 #[macro_use]
 #[cfg(doctests)]
@@ -79,7 +80,6 @@ doctest!("../README.md");
 // Doing this enables this crate to function under both std and no-std crates.
 #[doc(hidden)]
 pub use core::mem;
-
 #[doc(hidden)]
 pub use core::ptr;
 
