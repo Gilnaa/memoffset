@@ -66,10 +66,7 @@
         const_raw_ptr_deref
     )
 )]
-#![cfg_attr(
-    feature = "unstable_raw",
-    feature(raw_ref_macros)
-)]
+#![cfg_attr(feature = "unstable_raw", feature(raw_ref_macros))]
 
 #[macro_use]
 #[cfg(doctests)]
