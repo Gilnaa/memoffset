@@ -23,7 +23,7 @@ matrix:
     script:  # `--lib` added to prevent doctests from being compiled.
              # This is due to `unstable_const` requiring extra `feature(...)` directives
              # which the doctests do not have.
-      - cargo test --verbose --features unstable_const --lib
+      - cargo test --verbose --all-features --lib
 
   - env: RUSTFMT
     rust: 1.36.0
