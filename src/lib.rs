@@ -84,6 +84,8 @@ pub use core::mem;
 pub use core::ptr;
 
 #[macro_use]
+mod raw_field;
+#[macro_use]
 mod offset_of;
 #[macro_use]
 mod span_of;
