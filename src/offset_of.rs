@@ -31,7 +31,9 @@ macro_rules! _memoffset__let_base_ptr {
         // `let_base_ptr` declares a variable (several, actually)
         // instead of returning one.
         let uninit = $crate::mem::MaybeUninit::<$type>::uninit();
-        let $name = uninit.as_ptr();
+        // Transmuting for const-compatibility.
+        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
+        let $name: *const $type = unsafe { $crate::mem::transmute(&uninit) };
     };
 }
 #[cfg(not(maybe_uninit))]
@@ -72,7 +74,7 @@ macro_rules! offset_of {
         _memoffset__let_base_ptr!(base_ptr, $parent);
         // Get field pointer.
         let field_ptr = raw_field!(base_ptr, $parent, $field);
-        // Compute offset.
+        // Compute offset, as integers to make the fewest assumptions.
         (field_ptr as usize) - (base_ptr as usize)
     }};
 }
@@ -82,19 +84,12 @@ macro_rules! offset_of {
 macro_rules! offset_of {
     ($parent:path, $field:tt) => {{
         // Get a base pointer.
-        // No UB here, and the pointer does not dangle, either.
-        let uninit = $crate::mem::MaybeUninit::<$parent>::uninit();
-        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
-        unsafe {
-            // This, on the other hand, *is* UB, since we're creating a reference
-            // to uninitialized data.
-            // Unfortunately it's the best we can do at the moment.
-            let base_ptr = $crate::mem::transmute::<_, &$parent>(&uninit) as *const $parent;
-            // Get a field pointer.
-            let field_ptr = raw_field!(base_ptr, $parent, $field);
-            // Compute offset.
-            (field_ptr as *const u8).offset_from(base_ptr as *const u8) as usize
-        }
+        _memoffset__let_base_ptr!(base_ptr, $parent);
+        // Get field pointer.
+        let field_ptr = raw_field!(base_ptr, $parent, $field);
+        // Compute offset, with unstable `offset_from` for const-compatibility.
+        // (Requires the pointers to not dangle, but we already need that for `raw_field!` anyway.)
+        unsafe { (field_ptr as *const u8).offset_from(base_ptr as *const u8) as usize }
     }};
 }
 

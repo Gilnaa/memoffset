@@ -36,28 +36,6 @@ macro_rules! _memoffset__field_check {
 ///
 /// The `base` pointer *must not* be dangling, but it *may* point to
 /// uninitialized memory.
-#[cfg(feature = "unstable_raw")] // Correct variant that uses `raw_const!`.
-#[macro_export(local_inner_macros)]
-macro_rules! raw_field {
-    ($base:expr, $parent:path, $field:tt) => {{
-        _memoffset__field_check!($parent, $field);
-        let base_ptr: *const $parent = $base;
-
-        // Get the field address without creating a reference.
-        // Crucially, we know that this will not trigger a deref coercion because
-        // of the `field_check!` we did above.
-        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
-        unsafe {
-            $crate::ptr::raw_const!((*base_ptr).$field)
-        }
-    }};
-}
-
-/// Computes a const raw pointer to the given field of the given base pointer
-/// to the given parent type.
-///
-/// The `base` pointer *must not* be dangling, but it *may* point to
-/// uninitialized memory.
 #[cfg(not(feature = "unstable_raw"))] // Incorrect (UB) variant that creates an intermediate reference.
 #[macro_export(local_inner_macros)]
 macro_rules! raw_field {
@@ -73,6 +51,23 @@ macro_rules! raw_field {
         #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
         unsafe {
             &(*base_ptr).$field as *const _
+        }
+    }};
+}
+
+#[cfg(feature = "unstable_raw")] // Correct variant that uses `raw_const!`.
+#[macro_export(local_inner_macros)]
+macro_rules! raw_field {
+    ($base:expr, $parent:path, $field:tt) => {{
+        _memoffset__field_check!($parent, $field);
+        let base_ptr: *const $parent = $base;
+
+        // Get the field address without creating a reference.
+        // Crucially, we know that this will not trigger a deref coercion because
+        // of the `field_check!` we did above.
+        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
+        unsafe {
+            $crate::ptr::raw_const!((*base_ptr).$field)
         }
     }};
 }
