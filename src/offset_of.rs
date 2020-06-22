@@ -42,9 +42,30 @@ macro_rules! _memoffset__let_base_ptr {
 macro_rules! _memoffset__let_base_ptr {
     ($name:ident, $type:path) => {
         // No UB right here, but we will later dereference this pointer to
-        // offset into a field, and that is UB when the pointer is dangling.
+        // offset into a field, and that is UB because the pointer is dangling.
         let $name = $crate::mem::align_of::<$type>() as *const $type;
     };
+}
+
+/// Macro to compute the distance between two pointers.
+#[cfg(feature = "unstable_const")]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! _memoffset_offset_from {
+    ($field:expr, $base:expr) => {
+        // Compute offset, with unstable `offset_from` for const-compatibility.
+        // (Requires the pointers to not dangle, but we already need that for `raw_field!` anyway.)
+        unsafe { ($field as *const u8).offset_from($base as *const u8) as usize }
+    }
+}
+#[cfg(not(feature = "unstable_const"))]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! _memoffset_offset_from {
+    ($field:expr, $base:expr) => {
+        // Compute offset.
+        ($field as usize) - ($base as usize)
+    }
 }
 
 /// Calculates the offset of the specified field from the start of the struct.
@@ -66,30 +87,15 @@ macro_rules! _memoffset__let_base_ptr {
 ///     assert_eq!(offset_of!(Foo, b), 4);
 /// }
 /// ```
-#[cfg(not(feature = "unstable_const"))]
 #[macro_export(local_inner_macros)]
 macro_rules! offset_of {
     ($parent:path, $field:tt) => {{
-        // Get a base pointer.
+        // Get a base pointer (non-dangling if rustc supports `MaybeUninit`).
         _memoffset__let_base_ptr!(base_ptr, $parent);
         // Get field pointer.
         let field_ptr = raw_field!(base_ptr, $parent, $field);
-        // Compute offset, as integers to make the fewest assumptions.
-        (field_ptr as usize) - (base_ptr as usize)
-    }};
-}
-
-#[cfg(feature = "unstable_const")]
-#[macro_export(local_inner_macros)]
-macro_rules! offset_of {
-    ($parent:path, $field:tt) => {{
-        // Get a base pointer.
-        _memoffset__let_base_ptr!(base_ptr, $parent);
-        // Get field pointer.
-        let field_ptr = raw_field!(base_ptr, $parent, $field);
-        // Compute offset, with unstable `offset_from` for const-compatibility.
-        // (Requires the pointers to not dangle, but we already need that for `raw_field!` anyway.)
-        unsafe { (field_ptr as *const u8).offset_from(base_ptr as *const u8) as usize }
+        // Compute offset.
+        _memoffset_offset_from!(field_ptr, base_ptr)
     }};
 }
 
