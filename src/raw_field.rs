@@ -18,17 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// Deref-coercion protection macro.
+/// `raw_const!`, or just ref-then-cast when that is not available.
+#[cfg(feature = "unstable_raw")]
 #[macro_export]
 #[doc(hidden)]
-macro_rules! _memoffset__field_check {
-    ($type:path, $field:tt) => {
-        // Make sure the field actually exists. This line ensures that a
-        // compile-time error is generated if $field is accessed through a
-        // Deref impl.
-        #[cfg_attr(allow_clippy, allow(clippy::unneeded_field_pattern))]
-        let $type { $field: _, .. };
-    };
+macro_rules! _memoffset__raw_const {
+    ($path:expr) => {{
+        $crate::ptr::raw_const!($path)
+    }};
+}
+#[cfg(not(feature = "unstable_raw"))]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! _memoffset__raw_const {
+    ($path:expr) => {{
+        // This is UB because we create an intermediate reference to uninitialized memory.
+        // Nothing we can do about that without `raw_const!` though.
+        &$path as *const _
+    }};
 }
 
 /// Computes a const raw pointer to the given field of the given base pointer
@@ -36,38 +43,21 @@ macro_rules! _memoffset__field_check {
 ///
 /// The `base` pointer *must not* be dangling, but it *may* point to
 /// uninitialized memory.
-#[cfg(not(feature = "unstable_raw"))] // Incorrect (UB) variant that creates an intermediate reference.
 #[macro_export(local_inner_macros)]
 macro_rules! raw_field {
     ($base:expr, $parent:path, $field:tt) => {{
-        _memoffset__field_check!($parent, $field);
-        let base_ptr: *const $parent = $base;
+        // Make sure the field actually exists. This line ensures that a
+        // compile-time error is generated if $field is accessed through a
+        // Deref impl.
+        #[cfg_attr(allow_clippy, allow(clippy::unneeded_field_pattern))]
+        let $parent { $field: _, .. };
 
-        // Get the field address. This is UB because we are creating a reference to
-        // the uninitialized field. Will be updated to use `&raw` before rustc
-        // starts exploiting such UB.
+        // Get the field address.
         // Crucially, we know that this will not trigger a deref coercion because
-        // of the `field_check!` we did above.
+        // of the field check we did above.
         #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
         unsafe {
-            &(*base_ptr).$field as *const _
-        }
-    }};
-}
-
-#[cfg(feature = "unstable_raw")] // Correct variant that uses `raw_const!`.
-#[macro_export(local_inner_macros)]
-macro_rules! raw_field {
-    ($base:expr, $parent:path, $field:tt) => {{
-        _memoffset__field_check!($parent, $field);
-        let base_ptr: *const $parent = $base;
-
-        // Get the field address without creating a reference.
-        // Crucially, we know that this will not trigger a deref coercion because
-        // of the `field_check!` we did above.
-        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
-        unsafe {
-            $crate::ptr::raw_const!((*base_ptr).$field)
+            _memoffset__raw_const!((*($base as *const $parent)).$field)
         }
     }};
 }
