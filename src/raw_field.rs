@@ -38,6 +38,31 @@ macro_rules! _memoffset__raw_const {
     }};
 }
 
+/// Deref-coercion protection macro.
+#[cfg(allow_clippy)]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! _memoffset__field_check {
+    ($type:path, $field:tt) => {
+        // Make sure the field actually exists. This line ensures that a
+        // compile-time error is generated if $field is accessed through a
+        // Deref impl.
+        #[allow(clippy::unneeded_field_pattern)]
+        let $type { $field: _, .. };
+    };
+}
+#[cfg(not(allow_clippy))]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! _memoffset__field_check {
+    ($type:path, $field:tt) => {
+        // Make sure the field actually exists. This line ensures that a
+        // compile-time error is generated if $field is accessed through a
+        // Deref impl.
+        let $type { $field: _, .. };
+    };
+}
+
 /// Computes a const raw pointer to the given field of the given base pointer
 /// to the given parent type.
 ///
@@ -46,11 +71,7 @@ macro_rules! _memoffset__raw_const {
 #[macro_export(local_inner_macros)]
 macro_rules! raw_field {
     ($base:expr, $parent:path, $field:tt) => {{
-        // Make sure the field actually exists. This line ensures that a
-        // compile-time error is generated if $field is accessed through a
-        // Deref impl.
-        #[cfg_attr(allow_clippy, allow(clippy::unneeded_field_pattern))]
-        let $parent { $field: _, .. };
+        _memoffset__field_check!($parent, $field);
 
         // Get the field address.
         // Crucially, we know that this will not trigger a deref coercion because

@@ -56,7 +56,7 @@ macro_rules! _memoffset_offset_from {
         // Compute offset, with unstable `offset_from` for const-compatibility.
         // (Requires the pointers to not dangle, but we already need that for `raw_field!` anyway.)
         unsafe { ($field as *const u8).offset_from($base as *const u8) as usize }
-    }
+    };
 }
 #[cfg(not(feature = "unstable_const"))]
 #[macro_export]
@@ -65,7 +65,7 @@ macro_rules! _memoffset_offset_from {
     ($field:expr, $base:expr) => {
         // Compute offset.
         ($field as usize) - ($base as usize)
-    }
+    };
 }
 
 /// Calculates the offset of the specified field from the start of the struct.
