@@ -63,7 +63,7 @@
         ptr_offset_from,
         const_ptr_offset_from,
         const_transmute,
-        const_raw_ptr_deref
+        const_raw_ptr_deref,
     )
 )]
 #![cfg_attr(feature = "unstable_raw", feature(raw_ref_macros))]
@@ -83,6 +83,8 @@ pub use core::mem;
 #[doc(hidden)]
 pub use core::ptr;
 
+#[macro_use]
+mod raw_field;
 #[macro_use]
 mod offset_of;
 #[macro_use]

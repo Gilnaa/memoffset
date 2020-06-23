@@ -31,7 +31,9 @@ macro_rules! _memoffset__let_base_ptr {
         // `let_base_ptr` declares a variable (several, actually)
         // instead of returning one.
         let uninit = $crate::mem::MaybeUninit::<$type>::uninit();
-        let $name = uninit.as_ptr();
+        // Transmuting for const-compatibility.
+        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
+        let $name: *const $type = unsafe { $crate::mem::transmute(&uninit) };
     };
 }
 #[cfg(not(maybe_uninit))]
@@ -40,68 +42,30 @@ macro_rules! _memoffset__let_base_ptr {
 macro_rules! _memoffset__let_base_ptr {
     ($name:ident, $type:path) => {
         // No UB right here, but we will later dereference this pointer to
-        // offset into a field, and that is UB when the pointer is dangling.
+        // offset into a field, and that is UB because the pointer is dangling.
         let $name = $crate::mem::align_of::<$type>() as *const $type;
     };
 }
 
-/// Deref-coercion protection macro.
+/// Macro to compute the distance between two pointers.
+#[cfg(feature = "unstable_const")]
 #[macro_export]
 #[doc(hidden)]
-macro_rules! _memoffset__field_check {
-    ($type:path, $field:tt) => {
-        // Make sure the field actually exists. This line ensures that a
-        // compile-time error is generated if $field is accessed through a
-        // Deref impl.
-        #[cfg_attr(allow_clippy, allow(clippy::unneeded_field_pattern))]
-        let $type { $field: _, .. };
+macro_rules! _memoffset_offset_from {
+    ($field:expr, $base:expr) => {
+        // Compute offset, with unstable `offset_from` for const-compatibility.
+        // (Requires the pointers to not dangle, but we already need that for `raw_field!` anyway.)
+        unsafe { ($field as *const u8).offset_from($base as *const u8) as usize }
     };
 }
-
-/// Computes a const raw pointer to the given field of the given base pointer
-/// to the given parent type.
-///
-/// The `base` pointer *must not* be dangling, but it *may* point to
-/// uninitialized memory.
-#[cfg(feature = "unstable_raw")] // Correct variant that uses `raw_const!`.
-#[macro_export(local_inner_macros)]
-macro_rules! raw_field {
-    ($base:expr, $parent:path, $field:tt) => {{
-        _memoffset__field_check!($parent, $field);
-        let base_ptr: *const $parent = $base;
-
-        // Get the field address without creating a reference.
-        // Crucially, we know that this will not trigger a deref coercion because
-        // of the `field_check!` we did above.
-        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
-        unsafe {
-            $crate::ptr::raw_const!((*base_ptr).$field)
-        }
-    }};
-}
-
-/// Computes a const raw pointer to the given field of the given base pointer
-/// to the given parent type.
-///
-/// The `base` pointer *must not* be dangling, but it *may* point to
-/// uninitialized memory.
-#[cfg(not(feature = "unstable_raw"))] // Incorrect (UB) variant that creates an intermediate reference.
-#[macro_export(local_inner_macros)]
-macro_rules! raw_field {
-    ($base:expr, $parent:path, $field:tt) => {{
-        _memoffset__field_check!($parent, $field);
-        let base_ptr: *const $parent = $base;
-
-        // Get the field address. This is UB because we are creating a reference to
-        // the uninitialized field. Will be updated to use `&raw` before rustc
-        // starts exploiting such UB.
-        // Crucially, we know that this will not trigger a deref coercion because
-        // of the `field_check!` we did above.
-        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
-        unsafe {
-            &(*base_ptr).$field as *const _
-        }
-    }};
+#[cfg(not(feature = "unstable_const"))]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! _memoffset_offset_from {
+    ($field:expr, $base:expr) => {
+        // Compute offset.
+        ($field as usize) - ($base as usize)
+    };
 }
 
 /// Calculates the offset of the specified field from the start of the struct.
@@ -123,37 +87,15 @@ macro_rules! raw_field {
 ///     assert_eq!(offset_of!(Foo, b), 4);
 /// }
 /// ```
-#[cfg(not(feature = "unstable_const"))]
 #[macro_export(local_inner_macros)]
 macro_rules! offset_of {
     ($parent:path, $field:tt) => {{
-        // Get a base pointer.
+        // Get a base pointer (non-dangling if rustc supports `MaybeUninit`).
         _memoffset__let_base_ptr!(base_ptr, $parent);
         // Get field pointer.
         let field_ptr = raw_field!(base_ptr, $parent, $field);
         // Compute offset.
-        (field_ptr as usize) - (base_ptr as usize)
-    }};
-}
-
-#[cfg(feature = "unstable_const")]
-#[macro_export(local_inner_macros)]
-macro_rules! offset_of {
-    ($parent:path, $field:tt) => {{
-        // Get a base pointer.
-        // No UB here, and the pointer does not dangle, either.
-        let uninit = $crate::mem::MaybeUninit::<$parent>::uninit();
-        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
-        unsafe {
-            // This, on the other hand, *is* UB, since we're creating a reference
-            // to uninitialized data.
-            // Unfortunately it's the best we can do at the moment.
-            let base_ptr = $crate::mem::transmute::<_, &$parent>(&uninit) as *const $parent;
-            // Get a field pointer.
-            let field_ptr = raw_field!(base_ptr, $parent, $field);
-            // Compute offset.
-            (field_ptr as *const u8).offset_from(base_ptr as *const u8) as usize
-        }
+        _memoffset_offset_from!(field_ptr, base_ptr)
     }};
 }
 

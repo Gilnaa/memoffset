@@ -9,3 +9,6 @@ cargo miri setup
 
 cargo miri test
 cargo miri test --all-features
+
+# Restore old state in case Travis uses this cache for other jobs.
+rustup default nightly

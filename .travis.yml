@@ -5,8 +5,8 @@ cache:
 matrix:
   include:
   - name: miri
+    env: TRAVIS_MIRI_JOB # make sure the cache is not shared with other "nightly" jobs
     rust: nightly
-    os: linux
     script:
       - sh ci/miri.sh
 
@@ -19,10 +19,10 @@ matrix:
 
   - name: all-features
     rust: nightly
-    os: linux
-    script:  # `--lib` added to prevent doctests from being compiled.
-             # This is due to `unstable_const` requiring extra `feature(...)` directives
-             # which the doctests do not have.
+    script:
+      # `--lib` added to prevent doctests from being compiled.
+      # This is due to `unstable_const` requiring extra `feature(...)` directives
+      # which the doctests do not have.
       - cargo test --verbose --all-features --lib
 
   - name: rustfmt
