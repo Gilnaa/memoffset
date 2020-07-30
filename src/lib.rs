@@ -61,8 +61,9 @@
     feature = "unstable_const",
     feature(
         ptr_offset_from,
+        const_fn,
+        const_fn_transmute,
         const_ptr_offset_from,
-        const_transmute,
         const_raw_ptr_deref,
     )
 )]

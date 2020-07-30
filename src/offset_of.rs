@@ -194,4 +194,21 @@ mod tests {
 
         assert_eq!([0; offset_of!(Foo, b)].len(), 4);
     }
+
+    #[cfg(feature = "unstable_const")]
+    #[test]
+    fn const_fn_offset() {
+        const fn test_fn() -> usize {
+            #[repr(C)]
+            struct Foo {
+                a: u32,
+                b: [u8; 2],
+                c: i64,
+            }
+
+            offset_of!(Foo, b)
+        }
+
+        assert_eq!([0; test_fn()].len(), 4);
+    }
 }
