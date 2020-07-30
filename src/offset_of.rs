@@ -206,9 +206,9 @@ mod tests {
                 c: i64,
             }
 
-             offset_of!(Foo, b)
+            offset_of!(Foo, b)
         }
 
-        assert_eq!([0;test_fn()].len(), 4);
+        assert_eq!([0; test_fn()].len(), 4);
     }
 }
