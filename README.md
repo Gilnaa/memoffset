@@ -71,6 +71,11 @@ Your crate root: (`lib.rs`/`main.rs`)
 #![feature(ptr_offset_from, const_ptr_offset_from, const_raw_ptr_deref)]
 ```
 
+Or, if you intend to use `offset_of!` inside a `const fn`:
+```rust,ignore
+#![feature(ptr_offset_from, const_fn_transmute, const_ptr_offset_from, const_raw_ptr_deref)]
+```
+
 and then:
 
 ```rust,ignore
