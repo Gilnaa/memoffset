@@ -68,24 +68,10 @@ features = ["unstable_const"]
 
 Your crate root: (`lib.rs`/`main.rs`)
 ```rust,ignore
-#![feature(ptr_offset_from, const_ptr_offset_from, const_raw_ptr_deref)]
+#![feature(ptr_offset_from, const_ptr_offset_from, const_maybe_uninit_as_ptr, const_raw_ptr_deref)]
 ```
 
-Or, if you intend to use `offset_of!` inside a `const fn`:
-```rust,ignore
-#![feature(ptr_offset_from, const_fn, const_fn_transmute, const_ptr_offset_from, const_raw_ptr_deref)]
-```
-
-and then:
-
-```rust,ignore
-struct Foo {
-    a: u32,
-    b: u32,
-}
-
-let foo = [0; offset_of!(Foo, b)] 
-```
+If you intend to use `offset_of!` inside a `const fn`, also add the `const_fn` compiler feature.
 
 ### Raw references ###
 Recent nightlies support [a way to create raw pointers](https://github.com/rust-lang/rust/issues/73394) that avoids creating intermediate safe references.
