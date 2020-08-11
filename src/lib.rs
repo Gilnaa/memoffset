@@ -62,8 +62,8 @@
     feature(
         ptr_offset_from,
         const_fn,
-        const_fn_transmute,
         const_ptr_offset_from,
+        const_maybe_uninit_as_ptr,
         const_raw_ptr_deref,
     )
 )]

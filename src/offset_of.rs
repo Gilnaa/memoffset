@@ -31,9 +31,7 @@ macro_rules! _memoffset__let_base_ptr {
         // `let_base_ptr` declares a variable (several, actually)
         // instead of returning one.
         let uninit = $crate::mem::MaybeUninit::<$type>::uninit();
-        // Transmuting for const-compatibility.
-        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
-        let $name: *const $type = unsafe { $crate::mem::transmute(&uninit) };
+        let $name: *const $type = uninit.as_ptr();
     };
 }
 #[cfg(not(maybe_uninit))]
