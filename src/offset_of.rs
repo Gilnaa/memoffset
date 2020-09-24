@@ -24,7 +24,7 @@
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset__let_base_ptr {
-    ($name:ident, $type:path) => {
+    ($name:ident, $type:ty) => {
         // No UB here, and the pointer does not dangle, either.
         // But we have to make sure that `uninit` lives long enough,
         // so it has to be in the same scope as `$name`. That's why
@@ -38,7 +38,7 @@ macro_rules! _memoffset__let_base_ptr {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset__let_base_ptr {
-    ($name:ident, $type:path) => {
+    ($name:ident, $type:ty) => {
         // No UB right here, but we will later dereference this pointer to
         // offset into a field, and that is UB because the pointer is dangling.
         let $name = $crate::mem::align_of::<$type>() as *const $type;
@@ -87,7 +87,7 @@ macro_rules! _memoffset_offset_from {
 /// ```
 #[macro_export(local_inner_macros)]
 macro_rules! offset_of {
-    ($parent:path, $field:tt) => {{
+    ($parent:ty, $field:tt) => {{
         // Get a base pointer (non-dangling if rustc supports `MaybeUninit`).
         _memoffset__let_base_ptr!(base_ptr, $parent);
         // Get field pointer.
@@ -158,6 +158,18 @@ mod tests {
         }
 
         assert_eq!(foo(Pair(0, 0)), 4);
+    }
+
+    #[test]
+    fn test_tuple_offset() {
+        let f = (0i32, 0.0f32, 0u8);
+        let f_ptr = &f as *const _;
+        let f1_ptr = &f.1 as *const _;
+
+        assert_eq!(
+            f1_ptr as usize - f_ptr as usize,
+            offset_of!((i32, f32, u8), 1)
+        );
     }
 
     #[test]

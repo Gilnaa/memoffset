@@ -70,8 +70,8 @@ macro_rules! _memoffset__field_check {
 /// uninitialized memory.
 #[macro_export(local_inner_macros)]
 macro_rules! raw_field {
-    ($base:expr, $parent:path, $field:tt) => {{
-        _memoffset__field_check!($parent, $field);
+    ($base:expr, $parent:ty, $field:tt) => {{
+        // _memoffset__field_check!($parent, $field);
 
         // Get the field address.
         // Crucially, we know that this will not trigger a deref coercion because
