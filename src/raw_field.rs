@@ -67,7 +67,7 @@ macro_rules! _memoffset__field_check {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset__field_check_tuple {
-    ($type:ty, $field:literal) => {
+    ($type:ty, $field:tt) => {
         // Make sure the type argument is a tuple
         let (_, ..): $type;
     };
