@@ -87,11 +87,19 @@ macro_rules! _memoffset_offset_from {
 /// ```
 #[macro_export(local_inner_macros)]
 macro_rules! offset_of {
-    ($parent:ty, $field:tt) => {{
+    ($parent:path, $field:tt) => {{
         // Get a base pointer (non-dangling if rustc supports `MaybeUninit`).
         _memoffset__let_base_ptr!(base_ptr, $parent);
         // Get field pointer.
         let field_ptr = raw_field!(base_ptr, $parent, $field);
+        // Compute offset.
+        _memoffset_offset_from!(field_ptr, base_ptr)
+    }};
+    ($parent:ty, $field:tt) => {{
+        // Get a base pointer (non-dangling if rustc supports `MaybeUninit`).
+        _memoffset__let_base_ptr!(base_ptr, $parent);
+        // Get field pointer.
+        let field_ptr = raw_field_tuple!(base_ptr, $parent, $field);
         // Compute offset.
         _memoffset_offset_from!(field_ptr, base_ptr)
     }};

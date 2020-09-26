@@ -63,6 +63,16 @@ macro_rules! _memoffset__field_check {
     };
 }
 
+/// Deref-coercion protection macro.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! _memoffset__field_check_tuple {
+    ($type:ty, $field:literal) => {
+        // Make sure the type argument is a tuple
+        let (_, ..): $type;
+    };
+}
+
 /// Computes a const raw pointer to the given field of the given base pointer
 /// to the given parent type.
 ///
@@ -70,8 +80,29 @@ macro_rules! _memoffset__field_check {
 /// uninitialized memory.
 #[macro_export(local_inner_macros)]
 macro_rules! raw_field {
+    ($base:expr, $parent:path, $field:tt) => {{
+        _memoffset__field_check!($parent, $field);
+
+        // Get the field address.
+        // Crucially, we know that this will not trigger a deref coercion because
+        // of the field check we did above.
+        #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
+        unsafe {
+            _memoffset__raw_const!((*($base as *const $parent)).$field)
+        }
+    }};
+}
+
+/// Computes a const raw pointer to the given field of the given base pointer
+/// to the given parent type.
+///
+/// The `base` pointer *must not* be dangling, but it *may* point to
+/// uninitialized memory.
+#[macro_export(local_inner_macros)]
+#[doc(hidden)]
+macro_rules! raw_field_tuple {
     ($base:expr, $parent:ty, $field:tt) => {{
-        // _memoffset__field_check!($parent, $field);
+        _memoffset__field_check_tuple!($parent, $field);
 
         // Get the field address.
         // Crucially, we know that this will not trigger a deref coercion because
