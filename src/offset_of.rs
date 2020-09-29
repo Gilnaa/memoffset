@@ -168,6 +168,7 @@ mod tests {
         assert_eq!(foo(Pair(0, 0)), 4);
     }
 
+    #[cfg(tuple_ty)]
     #[test]
     fn test_tuple_offset() {
         let f = (0i32, 0.0f32, 0u8);
