@@ -15,10 +15,10 @@ Add the following dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-memoffset = "0.5"
+memoffset = "0.6"
 ```
 
-These versions will compile fine with rustc versions greater or equal to 1.19.
+These versions will compile fine with rustc versions greater or equal to 1.20.
 
 Add the following lines at the top of your `main.rs` or `lib.rs` files.
 
