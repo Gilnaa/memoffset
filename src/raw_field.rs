@@ -78,9 +78,6 @@ macro_rules! _memoffset__field_check_tuple {
 ///
 /// The `base` pointer *must not* be dangling, but it *may* point to
 /// uninitialized memory.
-///
-/// If you are trying to use this macro from another macro, you must use
-/// [`raw_field_tuple!`](macro.raw_field_tuple.html) for tuples and `raw_field!` for named structs.
 #[macro_export(local_inner_macros)]
 macro_rules! raw_field {
     ($base:expr, $parent:path, $field:tt) => {{
@@ -94,9 +91,6 @@ macro_rules! raw_field {
             _memoffset__raw_const!((*($base as *const $parent)).$field)
         }
     }};
-    ($base:expr, $parent:ty, $field:tt) => {{
-        raw_field_tuple!($base, $parent, $field)
-    }};
 }
 
 /// Computes a const raw pointer to the given field of the given base pointer
@@ -104,6 +98,7 @@ macro_rules! raw_field {
 ///
 /// The `base` pointer *must not* be dangling, but it *may* point to
 /// uninitialized memory.
+#[cfg(tuple_ty)]
 #[macro_export(local_inner_macros)]
 macro_rules! raw_field_tuple {
     ($base:expr, $parent:ty, $field:tt) => {{
