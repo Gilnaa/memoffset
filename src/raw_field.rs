@@ -94,7 +94,7 @@ macro_rules! raw_field {
 }
 
 /// Computes a const raw pointer to the given field of the given base pointer
-/// to the given parent type.
+/// to the given parent tuple typle.
 ///
 /// The `base` pointer *must not* be dangling, but it *may* point to
 /// uninitialized memory.
