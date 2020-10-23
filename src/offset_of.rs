@@ -24,7 +24,7 @@
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset__let_base_ptr {
-    ($name:ident, $type:path) => {
+    ($name:ident, $type:ty) => {
         // No UB here, and the pointer does not dangle, either.
         // But we have to make sure that `uninit` lives long enough,
         // so it has to be in the same scope as `$name`. That's why
@@ -38,7 +38,7 @@ macro_rules! _memoffset__let_base_ptr {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset__let_base_ptr {
-    ($name:ident, $type:path) => {
+    ($name:ident, $type:ty) => {
         // No UB right here, but we will later dereference this pointer to
         // offset into a field, and that is UB because the pointer is dangling.
         let $name = $crate::mem::align_of::<$type>() as *const $type;
@@ -66,7 +66,7 @@ macro_rules! _memoffset_offset_from {
     };
 }
 
-/// Calculates the offset of the specified field from the start of the struct.
+/// Calculates the offset of the specified field from the start of the named struct.
 ///
 /// ## Examples
 /// ```
@@ -92,6 +92,30 @@ macro_rules! offset_of {
         _memoffset__let_base_ptr!(base_ptr, $parent);
         // Get field pointer.
         let field_ptr = raw_field!(base_ptr, $parent, $field);
+        // Compute offset.
+        _memoffset_offset_from!(field_ptr, base_ptr)
+    }};
+}
+
+/// Calculates the offset of the specified field from the start of the tuple.
+///
+/// ## Examples
+/// ```
+/// #[macro_use]
+/// extern crate memoffset;
+///
+/// fn main() {
+///     assert!(offset_of_tuple!((u8, u32), 1) >= 0, "Tuples do not have a defined layout");
+/// }
+/// ```
+#[cfg(tuple_ty)]
+#[macro_export(local_inner_macros)]
+macro_rules! offset_of_tuple {
+    ($parent:ty, $field:tt) => {{
+        // Get a base pointer (non-dangling if rustc supports `MaybeUninit`).
+        _memoffset__let_base_ptr!(base_ptr, $parent);
+        // Get field pointer.
+        let field_ptr = raw_field_tuple!(base_ptr, $parent, $field);
         // Compute offset.
         _memoffset_offset_from!(field_ptr, base_ptr)
     }};
@@ -160,6 +184,19 @@ mod tests {
         assert_eq!(foo(Pair(0, 0)), 4);
     }
 
+    #[cfg(tuple_ty)]
+    #[test]
+    fn test_tuple_offset() {
+        let f = (0i32, 0.0f32, 0u8);
+        let f_ptr = &f as *const _;
+        let f1_ptr = &f.1 as *const _;
+
+        assert_eq!(
+            f1_ptr as usize - f_ptr as usize,
+            offset_of_tuple!((i32, f32, u8), 1)
+        );
+    }
+
     #[test]
     fn test_raw_field() {
         #[repr(C)]
@@ -178,6 +215,27 @@ mod tests {
         assert_eq!(f_ptr as usize + 0, raw_field!(f_ptr, Foo, a) as usize);
         assert_eq!(f_ptr as usize + 4, raw_field!(f_ptr, Foo, b) as usize);
         assert_eq!(f_ptr as usize + 8, raw_field!(f_ptr, Foo, c) as usize);
+    }
+
+    #[cfg(tuple_ty)]
+    #[test]
+    fn test_raw_field_tuple() {
+        let t = (0u32, 0u8, false);
+        let t_ptr = &t as *const _;
+        let t_addr = t_ptr as usize;
+
+        assert_eq!(
+            &t.0 as *const _ as usize - t_addr,
+            raw_field_tuple!(t_ptr, (u32, u8, bool), 0) as usize - t_addr
+        );
+        assert_eq!(
+            &t.1 as *const _ as usize - t_addr,
+            raw_field_tuple!(t_ptr, (u32, u8, bool), 1) as usize - t_addr
+        );
+        assert_eq!(
+            &t.2 as *const _ as usize - t_addr,
+            raw_field_tuple!(t_ptr, (u32, u8, bool), 2) as usize - t_addr
+        );
     }
 
     #[cfg(feature = "unstable_const")]

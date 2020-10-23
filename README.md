@@ -6,6 +6,7 @@ C-Like `offset_of` functionality for Rust structs.
 
 Introduces the following macros:
  * `offset_of!` for obtaining the offset of a member of a struct.
+ * `offset_of_tuple!` for obtaining the offset of a member of a tuple. (Requires Rust 1.20+)
  * `span_of!` for obtaining the range that a field, or fields, span.
 
 `memoffset` works under `no_std` environments.
