@@ -225,15 +225,15 @@ mod tests {
         let t_addr = t_ptr as usize;
 
         assert_eq!(
-            offset_of_tuple!((u32, u8, bool), 0),
+            &t.0 as *const _ as usize - t_addr,
             raw_field_tuple!(t_ptr, (u32, u8, bool), 0) as usize - t_addr
         );
         assert_eq!(
-            offset_of_tuple!((u32, u8, bool), 1),
+            &t.1 as *const _ as usize - t_addr,
             raw_field_tuple!(t_ptr, (u32, u8, bool), 1) as usize - t_addr
         );
         assert_eq!(
-            offset_of_tuple!((u32, u8, bool), 2),
+            &t.2 as *const _ as usize - t_addr,
             raw_field_tuple!(t_ptr, (u32, u8, bool), 2) as usize - t_addr
         );
     }
