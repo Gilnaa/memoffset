@@ -82,13 +82,14 @@ macro_rules! _memoffset__field_check_tuple {
 macro_rules! raw_field {
     ($base:expr, $parent:path, $field:tt) => {{
         _memoffset__field_check!($parent, $field);
+        let base = $base; // evaluate $base outside the `unsafe` block
 
         // Get the field address.
         // Crucially, we know that this will not trigger a deref coercion because
         // of the field check we did above.
         #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
         unsafe {
-            _memoffset__addr_of!((*($base as *const $parent)).$field)
+            _memoffset__addr_of!((*(base as *const $parent)).$field)
         }
     }};
 }
@@ -103,13 +104,14 @@ macro_rules! raw_field {
 macro_rules! raw_field_tuple {
     ($base:expr, $parent:ty, $field:tt) => {{
         _memoffset__field_check_tuple!($parent, $field);
+        let base = $base; // evaluate $base outside the `unsafe` block
 
         // Get the field address.
         // Crucially, we know that this will not trigger a deref coercion because
         // of the field check we did above.
         #[allow(unused_unsafe)] // for when the macro is used in an unsafe block
         unsafe {
-            _memoffset__addr_of!((*($base as *const $parent)).$field)
+            _memoffset__addr_of!((*(base as *const $parent)).$field)
         }
     }};
 }

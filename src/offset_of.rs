@@ -50,11 +50,13 @@ macro_rules! _memoffset__let_base_ptr {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset_offset_from {
-    ($field:expr, $base:expr) => {
+    ($field:expr, $base:expr) => {{
+        let field = $field; // evaluate $field outside the `unsafe` block
+        let base = $base; // evaluate $base outside the `unsafe` block
         // Compute offset, with unstable `offset_from` for const-compatibility.
         // (Requires the pointers to not dangle, but we already need that for `raw_field!` anyway.)
-        unsafe { ($field as *const u8).offset_from($base as *const u8) as usize }
-    };
+        unsafe { (field as *const u8).offset_from(base as *const u8) as usize }
+    }};
 }
 #[cfg(not(feature = "unstable_const"))]
 #[macro_export]
