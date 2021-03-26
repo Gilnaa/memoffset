@@ -49,7 +49,7 @@ macro_rules! _memoffset__let_base_ptr {
 #[cfg(feature = "unstable_const")]
 #[macro_export]
 #[doc(hidden)]
-macro_rules! _memoffset_offset_from {
+macro_rules! _memoffset_offset_from_unsafe {
     ($field:expr, $base:expr) => {{
         let field = $field; // evaluate $field outside the `unsafe` block
         let base = $base; // evaluate $base outside the `unsafe` block
@@ -61,7 +61,7 @@ macro_rules! _memoffset_offset_from {
 #[cfg(not(feature = "unstable_const"))]
 #[macro_export]
 #[doc(hidden)]
-macro_rules! _memoffset_offset_from {
+macro_rules! _memoffset_offset_from_unsafe {
     ($field:expr, $base:expr) => {
         // Compute offset.
         ($field as usize) - ($base as usize)
@@ -95,7 +95,7 @@ macro_rules! offset_of {
         // Get field pointer.
         let field_ptr = raw_field!(base_ptr, $parent, $field);
         // Compute offset.
-        _memoffset_offset_from!(field_ptr, base_ptr)
+        _memoffset_offset_from_unsafe!(field_ptr, base_ptr)
     }};
 }
 
@@ -119,7 +119,7 @@ macro_rules! offset_of_tuple {
         // Get field pointer.
         let field_ptr = raw_field_tuple!(base_ptr, $parent, $field);
         // Compute offset.
-        _memoffset_offset_from!(field_ptr, base_ptr)
+        _memoffset_offset_from_unsafe!(field_ptr, base_ptr)
     }};
 }
 
