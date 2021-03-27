@@ -24,7 +24,7 @@
 #[doc(hidden)]
 macro_rules! _memoffset__addr_of {
     ($path:expr) => {{
-        $crate::ptr::addr_of!($path)
+        $crate::__priv::ptr::addr_of!($path)
     }};
 }
 #[cfg(not(raw_ref_macros))]

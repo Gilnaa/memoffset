@@ -11,8 +11,11 @@ matrix:
       - sh ci/miri.sh
 
   - rust: 1.19.0  # Oldest supported (first version with numeric fields in struct patterns)
+  - rust: 1.20.0  # Oldest supported with tuple_ty
   - rust: 1.31.0  # Oldest supported with allow(clippy)
   - rust: 1.36.0  # Oldest supported with MaybeUninit
+  - rust: 1.40.0  # Oldest supported with cfg(doctest)
+  - rust: 1.51.0  # Oldest supported with ptr::addr_of!
   - rust: stable
   - rust: beta
   - rust: nightly
