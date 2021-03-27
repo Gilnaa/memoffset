@@ -30,7 +30,7 @@ macro_rules! _memoffset__let_base_ptr {
         // so it has to be in the same scope as `$name`. That's why
         // `let_base_ptr` declares a variable (several, actually)
         // instead of returning one.
-        let uninit = $crate::mem::MaybeUninit::<$type>::uninit();
+        let uninit = $crate::__priv::mem::MaybeUninit::<$type>::uninit();
         let $name: *const $type = uninit.as_ptr();
     };
 }
@@ -41,7 +41,7 @@ macro_rules! _memoffset__let_base_ptr {
     ($name:ident, $type:ty) => {
         // No UB right here, but we will later dereference this pointer to
         // offset into a field, and that is UB because the pointer is dangling.
-        let $name = $crate::mem::align_of::<$type>() as *const $type;
+        let $name = $crate::__priv::mem::align_of::<$type>() as *const $type;
     };
 }
 
