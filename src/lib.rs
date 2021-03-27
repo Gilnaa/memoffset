@@ -83,6 +83,16 @@ pub use core::mem;
 #[doc(hidden)]
 pub use core::ptr;
 
+/// Hiden module to things the macros need to access.
+#[doc(hidden)]
+pub mod __priv {
+    /// Use type inference to obtain the size of the pointee (without actually using the pointer).
+    #[doc(hidden)]
+    pub fn size_of_pointee<T>(_ptr: *const T) -> usize {
+        core::mem::size_of::<T>()
+    }
+}
+
 #[macro_use]
 mod raw_field;
 #[macro_use]
