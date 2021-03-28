@@ -255,6 +255,18 @@ mod tests {
 
     #[cfg(feature = "unstable_const")]
     #[test]
+    fn const_offset_interior_mutable() {
+        #[repr(C)]
+        struct Foo {
+            a: u32,
+            b: core::cell::Cell<u32>,
+        }
+
+        assert_eq!([0; offset_of!(Foo, b)].len(), 4);
+    }
+
+    #[cfg(feature = "unstable_const")]
+    #[test]
     fn const_fn_offset() {
         const fn test_fn() -> usize {
             #[repr(C)]
