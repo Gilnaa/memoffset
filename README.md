@@ -1,6 +1,6 @@
 # memoffset #
 
-[![](http://meritbadge.herokuapp.com/memoffset)](https://crates.io/crates/memoffset)
+[![](https://img.shields.io/crates/v/memoffset.svg)](https://crates.io/crates/memoffset)
 
 C-Like `offset_of` functionality for Rust structs.
 
