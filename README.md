@@ -21,17 +21,9 @@ memoffset = "0.6"
 
 These versions will compile fine with rustc versions greater or equal to 1.19.
 
-Add the following lines at the top of your `main.rs` or `lib.rs` files.
-
-```rust,ignore
-#[macro_use]
-extern crate memoffset;
-```
-
 ## Examples ##
 ```rust
-#[macro_use]
-extern crate memoffset;
+use memoffset::{offset_of, span_of};
 
 #[repr(C, packed)]
 struct Foo {
