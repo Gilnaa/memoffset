@@ -9,6 +9,24 @@ jobs:
     strategy:
       matrix:
         rust:
+          - stable
+          - beta
+          - nightly
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - name: Run cargo test
+        run: cargo test
+
+  test-msrv:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
           - 1.19.0  # Oldest supported (first version with numeric fields in struct patterns)
           - 1.20.0  # Oldest supported with tuple_ty
           - 1.31.0  # Oldest supported with allow(clippy)
@@ -25,7 +43,9 @@ jobs:
           toolchain: ${{ matrix.rust }}
           override: true
       - name: Run cargo test
-        run: cargo test
+        # Exclude doctests here, as we don't want to clutter docs themselves
+        # with backwards compatibility workarounds.
+        run: cargo test --lib
 
   nightly:
     name: Test Suite (nightly features)

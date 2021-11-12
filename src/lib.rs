@@ -24,8 +24,7 @@
 //!
 //! ## Examples
 //! ```
-//! #[macro_use]
-//! extern crate memoffset;
+//! use memoffset::{offset_of, span_of};
 //!
 //! #[repr(C, packed)]
 //! struct HelpMeIAmTrappedInAStructFactory {
@@ -75,7 +74,7 @@ extern crate doc_comment;
 #[cfg(doctest)]
 doctest!("../README.md");
 
-/// Hiden module for things the macros need to access.
+/// Hidden module for things the macros need to access.
 #[doc(hidden)]
 pub mod __priv {
     #[doc(hidden)]
