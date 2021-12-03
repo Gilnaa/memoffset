@@ -58,7 +58,7 @@
 #![no_std]
 #![cfg_attr(
     feature = "unstable_const",
-    feature(const_ptr_offset_from, const_raw_ptr_deref, const_refs_to_cell)
+    feature(const_ptr_offset_from, const_refs_to_cell)
 )]
 
 #[macro_use]
