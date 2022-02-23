@@ -64,6 +64,17 @@ macro_rules! _memoffset__field_check {
 }
 
 /// Deref-coercion protection macro.
+#[cfg(allow_clippy)]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! _memoffset__field_check_tuple {
+    ($type:ty, $field:tt) => {
+        // Make sure the type argument is a tuple
+        #[allow(clippy::unneeded_wildcard_pattern)]
+        let (_, ..): $type;
+    };
+}
+#[cfg(not(allow_clippy))]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset__field_check_tuple {
