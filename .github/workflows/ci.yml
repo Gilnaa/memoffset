@@ -67,8 +67,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install Miri
+        run: |
+          rustup toolchain install nightly --component miri
+          rustup override set nightly
+          cargo miri setup
       - name: Test with Miri
-        run: ci/miri.sh
+        run: |
+          cargo miri test
+          cargo miri test --all-features
 
   style:
     name: lints and formatting
