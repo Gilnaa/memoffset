@@ -39,6 +39,21 @@ macro_rules! _memoffset__addr_of {
 }
 
 /// Deref-coercion protection macro.
+///
+/// Prevents complilation if the specified field name is not a part of the
+/// struct definition.
+///
+/// ```compile_fail
+/// use memoffset::_memoffset__field_check;
+///
+/// struct Foo {
+///     foo: i32,
+/// }
+///
+/// type BoxedFoo = Box<Foo>;
+///
+/// _memoffset__field_check!(BoxedFoo, foo);
+/// ```
 #[cfg(allow_clippy)]
 #[macro_export]
 #[doc(hidden)]
@@ -64,6 +79,14 @@ macro_rules! _memoffset__field_check {
 }
 
 /// Deref-coercion protection macro.
+///
+/// Prevents complilation if the specified type is not a tuple.
+///
+/// ```compile_fail
+/// use memoffset::_memoffset__field_check_tuple;
+///
+/// _memoffset__field_check_tuple!(i32, 0);
+/// ```
 #[cfg(allow_clippy)]
 #[macro_export]
 #[doc(hidden)]
@@ -87,6 +110,18 @@ macro_rules! _memoffset__field_check_tuple {
 /// Deref-coercion protection macro for unions.
 /// Unfortunately accepts single-field structs as well, which is not ideal,
 /// but ultimately pretty harmless.
+///
+/// ```compile_fail
+/// use memoffset::_memoffset__field_check_union;
+///
+/// union Foo {
+///     variant_a: i32,
+/// }
+///
+/// type BoxedFoo = Box<Foo>;
+///
+/// _memoffset__field_check_union!(BoxedFoo, variant_a);
+/// ```
 #[cfg(allow_clippy)]
 #[macro_export]
 #[doc(hidden)]
