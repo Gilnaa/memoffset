@@ -86,6 +86,16 @@ macro_rules! _memoffset_offset_from_unsafe {
 ///     assert_eq!(offset_of!(Foo, b), 4);
 /// }
 /// ```
+///
+/// ## Notes
+/// Rust's ABI is unstable, and [type layout can be changed with each
+/// compilation](https://doc.rust-lang.org/reference/type-layout.html).
+///
+/// Using `offset_of!` with a `repr(Rust)` struct will return the correct offset of the
+/// specified `field` for a particular compilation, but the exact value may change
+/// based on the compiler version, concrete struct type, time of day, or rustc's mood.
+///
+/// As a result, the value should not be retained and used between different compilations.
 #[macro_export(local_inner_macros)]
 macro_rules! offset_of {
     ($parent:path, $field:tt) => {{
