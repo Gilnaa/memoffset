@@ -7,6 +7,7 @@ C-Like `offset_of` functionality for Rust structs.
 Introduces the following macros:
  * `offset_of!` for obtaining the offset of a member of a struct.
  * `offset_of_tuple!` for obtaining the offset of a member of a tuple. (Requires Rust 1.20+)
+ * `offset_of_union!` for obtaining the offset of a member of a union.
  * `span_of!` for obtaining the range that a field, or fields, span.
 
 `memoffset` works under `no_std` environments.
@@ -16,7 +17,7 @@ Add the following dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-memoffset = "0.7"
+memoffset = "0.8"
 ```
 
 These versions will compile fine with rustc versions greater or equal to 1.19.
@@ -66,7 +67,7 @@ Do note that `unstable_const` is an unstable feature that is set to be removed i
 Cargo.toml:
 ```toml
 [dependencies.memoffset]
-version = "0.7"
+version = "0.8"
 features = ["unstable_const"]
 ```
 
