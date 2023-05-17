@@ -18,3 +18,4 @@ doc-comment = "0.3"
 [features]
 default = []
 unstable_const = []
+unstable_offset_of = []
