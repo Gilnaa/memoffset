@@ -121,6 +121,8 @@ macro_rules! _memoffset__offset_of_impl {
 #[macro_export(local_inner_macros)]
 macro_rules! offset_of {
     ($parent:path, $field:tt) => {
+        // Macro implementation is delegated to another macro to have a
+        // single top-level macro to attach documentation to.
         _memoffset__offset_of_impl!($parent, $field)
     };
 }
@@ -196,6 +198,8 @@ macro_rules! _memoffset__offset_of_union_impl {
 #[macro_export(local_inner_macros)]
 macro_rules! offset_of_union {
     ($parent:path, $field:tt) => {{
+        // Macro implementation is delegated to another macro to have a
+        // single top-level macro to attach documentation to.
         _memoffset__offset_of_union_impl!($parent, $field)
     }};
 }
