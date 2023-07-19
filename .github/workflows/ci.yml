@@ -13,11 +13,10 @@ jobs:
           - beta
           - nightly
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          override: true
       - name: Run cargo test
         run: cargo test
 
@@ -38,11 +37,10 @@ jobs:
           - beta
           - nightly
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          override: true
       - name: Run cargo test
         # Exclude doctests here, as we don't want to clutter docs themselves
         # with backwards compatibility workarounds.
@@ -52,11 +50,10 @@ jobs:
     name: Test Suite (nightly features)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly
-          override: true
       - name: Run cargo test
         # `--lib` prevents doctests from being run.
         # This is due to `unstable_const` requiring extra `feature(...)` directives
@@ -67,12 +64,11 @@ jobs:
     name: Test Suite (Miri)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install Miri
-        run: |
-          rustup toolchain install nightly --component miri
-          rustup override set nightly
-          cargo miri setup
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+          components: miri
       - name: Test with Miri
         run: |
           cargo miri test
@@ -82,12 +78,11 @@ jobs:
     name: lints and formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
         with:
-            toolchain: 1.51.0 # pin a version for reproducible results
-            components: rustfmt
-            override: true
+          toolchain: 1.51.0 # pin a version for reproducible results
+          components: rustfmt
       - name: Check warnings
         run: RUSTFLAGS="-D warnings" cargo check --all-targets
       - name: Check formatting
