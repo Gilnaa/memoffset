@@ -17,7 +17,7 @@ Add the following dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-memoffset = "0.8"
+memoffset = "0.9"
 ```
 
 These versions will compile fine with rustc versions greater or equal to 1.19.
@@ -50,7 +50,7 @@ fn main() {
 `memoffset` has support for compile-time `offset_of!` on rust>=1.65, or on older nightly compilers.
 
 ### Usage on stable Rust ###
-Constant evaluation is automatically enabled and avilable on stable compilers starting with rustc 1.65.
+Constant evaluation is automatically enabled and available on stable compilers starting with rustc 1.65.
 
 This is an incomplete implementation with one caveat:
 Due to dependence on [`#![feature(const_refs_to_cell)]`](https://github.com/rust-lang/rust/issues/80384), you cannot get the offset of a `Cell` field in a const-context.
@@ -67,7 +67,7 @@ Do note that `unstable_const` is an unstable feature that is set to be removed i
 Cargo.toml:
 ```toml
 [dependencies.memoffset]
-version = "0.8"
+version = "0.9"
 features = ["unstable_const"]
 ```
 

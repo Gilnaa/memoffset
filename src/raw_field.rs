@@ -40,7 +40,7 @@ macro_rules! _memoffset__addr_of {
 
 /// Deref-coercion protection macro.
 ///
-/// Prevents complilation if the specified field name is not a part of the
+/// Prevents compilation if the specified field name is not a part of the
 /// struct definition.
 ///
 /// ```compile_fail
@@ -80,7 +80,7 @@ macro_rules! _memoffset__field_check {
 
 /// Deref-coercion protection macro.
 ///
-/// Prevents complilation if the specified type is not a tuple.
+/// Prevents compilation if the specified type is not a tuple.
 ///
 /// ```compile_fail
 /// use memoffset::_memoffset__field_check_tuple;
@@ -176,7 +176,7 @@ macro_rules! raw_field {
 }
 
 /// Computes a const raw pointer to the given field of the given base pointer
-/// to the given parent tuple typle.
+/// to the given parent tuple type.
 ///
 /// The `base` pointer *must not* be dangling, but it *may* point to
 /// uninitialized memory.
@@ -198,7 +198,7 @@ macro_rules! raw_field_tuple {
 }
 
 /// Computes a const raw pointer to the given field of the given base pointer
-/// to the given parent tuple typle.
+/// to the given parent tuple type.
 ///
 /// The `base` pointer *must not* be dangling, but it *may* point to
 /// uninitialized memory.

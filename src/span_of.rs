@@ -60,7 +60,7 @@ macro_rules! _memoffset__compile_error {
 /// ### Safety
 /// The inter-field form mentioned above assumes that the first field is positioned before the
 /// second.
-/// This is only guarenteed for `repr(C)` structs.
+/// This is only guaranteed for `repr(C)` structs.
 /// Usage with `repr(Rust)` structs may yield unexpected results, like downward-going ranges,
 /// spans that include unexpected fields, empty spans, or spans that include *unexpected* padding bytes.
 ///
