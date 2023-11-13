@@ -81,15 +81,13 @@ macro_rules! _memoffset__compile_error {
 ///     egg: [[u8; 4]; 4]
 /// }
 ///
-/// fn main() {
-///     assert_eq!(0..84,  span_of!(Blarg, ..));
-///     assert_eq!(0..8,   span_of!(Blarg, .. y));
-///     assert_eq!(0..64,  span_of!(Blarg, ..= y));
-///     assert_eq!(0..8,   span_of!(Blarg, x));
-///     assert_eq!(8..84,  span_of!(Blarg, y ..));
-///     assert_eq!(0..8,   span_of!(Blarg, x .. y));
-///     assert_eq!(0..64,  span_of!(Blarg, x ..= y));
-/// }
+/// assert_eq!(0..84,  span_of!(Blarg, ..));
+/// assert_eq!(0..8,   span_of!(Blarg, .. y));
+/// assert_eq!(0..64,  span_of!(Blarg, ..= y));
+/// assert_eq!(0..8,   span_of!(Blarg, x));
+/// assert_eq!(8..84,  span_of!(Blarg, y ..));
+/// assert_eq!(0..8,   span_of!(Blarg, x .. y));
+/// assert_eq!(0..64,  span_of!(Blarg, x ..= y));
 /// ```
 #[macro_export(local_inner_macros)]
 macro_rules! span_of {
