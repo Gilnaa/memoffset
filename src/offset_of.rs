@@ -103,10 +103,8 @@ macro_rules! _memoffset__offset_of_impl {
 ///     c: [u8; 5]
 /// }
 ///
-/// fn main() {
-///     assert_eq!(offset_of!(Foo, a), 0);
-///     assert_eq!(offset_of!(Foo, b), 4);
-/// }
+/// assert_eq!(offset_of!(Foo, a), 0);
+/// assert_eq!(offset_of!(Foo, b), 4);
 /// ```
 ///
 /// ## Notes
@@ -133,9 +131,7 @@ macro_rules! offset_of {
 /// ```
 /// use memoffset::offset_of_tuple;
 ///
-/// fn main() {
-///     assert!(offset_of_tuple!((u8, u32), 1) >= 0, "Tuples do not have a defined layout");
-/// }
+/// assert!(offset_of_tuple!((u8, u32), 1) >= 0, "Tuples do not have a defined layout");
 /// ```
 #[cfg(tuple_ty)]
 #[macro_export(local_inner_macros)]
@@ -186,9 +182,7 @@ macro_rules! _memoffset__offset_of_union_impl {
 ///     foo64: i64,
 /// }
 ///
-/// fn main() {
-///     assert!(offset_of_union!(Foo, foo64) == 0);
-/// }
+/// assert!(offset_of_union!(Foo, foo64) == 0);
 /// ```
 ///
 /// ## Note
