@@ -206,7 +206,7 @@ macro_rules! raw_field_tuple {
 /// ## Note
 /// This macro is the same as `raw_field`, except for a different Deref-coercion check that
 /// supports unions.
-/// Due to macro_rules limitations, this check will accept structs with a single field as well as unions.
+/// Due to `macro_rules!` limitations, this check will accept structs with a single field as well as unions.
 /// This is not a stable guarantee, and future versions of this crate might fail
 /// on any use of this macro with a struct, without a semver bump.
 #[macro_export(local_inner_macros)]

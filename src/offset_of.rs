@@ -186,7 +186,7 @@ macro_rules! _memoffset__offset_of_union_impl {
 /// ```
 ///
 /// ## Note
-/// Due to macro_rules limitations, this macro will accept structs with a single field as well as unions.
+/// Due to `macro_rules!` limitations, this macro will accept structs with a single field as well as unions.
 /// This is not a stable guarantee, and future versions of this crate might fail
 /// on any use of this macro with a struct, without a semver bump.
 #[macro_export(local_inner_macros)]
