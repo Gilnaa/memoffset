@@ -200,6 +200,8 @@ macro_rules! offset_of_union {
 
 #[cfg(test)]
 mod tests {
+    #![cfg_attr(allow_clippy, allow(clippy::identity_op))] // For `... + 0` constructs below.
+
     #[test]
     fn offset_simple() {
         #[repr(C)]
