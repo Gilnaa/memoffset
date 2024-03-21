@@ -67,7 +67,7 @@ macro_rules! _memoffset_offset_from_unsafe {
         ($field as usize) - ($base as usize)
     };
 }
-#[cfg(not(feature = "unstable_offset_of"))]
+#[cfg(not(any(feature = "unstable_offset_of", stable_offset_of)))]
 #[macro_export(local_inner_macros)]
 #[doc(hidden)]
 macro_rules! _memoffset__offset_of_impl {
@@ -80,10 +80,13 @@ macro_rules! _memoffset__offset_of_impl {
         _memoffset_offset_from_unsafe!(field_ptr, base_ptr)
     }};
 }
-#[cfg(feature = "unstable_offset_of")]
+#[cfg(any(feature = "unstable_offset_of", stable_offset_of))]
 #[macro_export]
 #[doc(hidden)]
-#[allow_internal_unstable(offset_of)]
+#[cfg_attr(
+    all(feature = "unstable_offset_of", not(stable_offset_of)),
+    allow_internal_unstable(offset_of)
+)]
 macro_rules! _memoffset__offset_of_impl {
     ($parent:path, $field:tt) => {{
         $crate::__priv::mem::offset_of!($parent, $field)
@@ -125,6 +128,35 @@ macro_rules! offset_of {
     };
 }
 
+#[cfg(tuple_ty)]
+#[cfg(not(any(feature = "unstable_offset_of", stable_offset_of)))]
+#[macro_export(local_inner_macros)]
+#[doc(hidden)]
+macro_rules! _memoffset__offset_of_tuple_impl {
+    ($parent:ty, $field:tt) => {{
+        // Get a base pointer (non-dangling if rustc supports `MaybeUninit`).
+        _memoffset__let_base_ptr!(base_ptr, $parent);
+        // Get field pointer.
+        let field_ptr = raw_field_tuple!(base_ptr, $parent, $field);
+        // Compute offset.
+        _memoffset_offset_from_unsafe!(field_ptr, base_ptr)
+    }};
+}
+
+#[cfg(tuple_ty)]
+#[cfg(any(feature = "unstable_offset_of", stable_offset_of))]
+#[macro_export(local_inner_macros)]
+#[doc(hidden)]
+#[cfg_attr(
+    all(feature = "unstable_offset_of", not(stable_offset_of)),
+    allow_internal_unstable(offset_of)
+)]
+macro_rules! _memoffset__offset_of_tuple_impl {
+    ($parent:ty, $field:tt) => {{
+        $crate::__priv::mem::offset_of!($parent, $field)
+    }};
+}
+
 /// Calculates the offset of the specified field from the start of the tuple.
 ///
 /// ## Examples
@@ -137,16 +169,13 @@ macro_rules! offset_of {
 #[macro_export(local_inner_macros)]
 macro_rules! offset_of_tuple {
     ($parent:ty, $field:tt) => {{
-        // Get a base pointer (non-dangling if rustc supports `MaybeUninit`).
-        _memoffset__let_base_ptr!(base_ptr, $parent);
-        // Get field pointer.
-        let field_ptr = raw_field_tuple!(base_ptr, $parent, $field);
-        // Compute offset.
-        _memoffset_offset_from_unsafe!(field_ptr, base_ptr)
+        // Macro implementation is delegated to another macro to have a
+        // single top-level macro to attach documentation to.
+        _memoffset__offset_of_tuple_impl!($parent, $field)
     }};
 }
 
-#[cfg(not(feature = "unstable_offset_of"))]
+#[cfg(not(any(feature = "unstable_offset_of", stable_offset_of)))]
 #[macro_export(local_inner_macros)]
 #[doc(hidden)]
 macro_rules! _memoffset__offset_of_union_impl {
@@ -160,10 +189,13 @@ macro_rules! _memoffset__offset_of_union_impl {
     }};
 }
 
-#[cfg(feature = "unstable_offset_of")]
+#[cfg(any(feature = "unstable_offset_of", stable_offset_of))]
 #[macro_export(local_inner_macros)]
 #[doc(hidden)]
-#[allow_internal_unstable(offset_of)]
+#[cfg_attr(
+    all(feature = "unstable_offset_of", not(stable_offset_of)),
+    allow_internal_unstable(offset_of)
+)]
 macro_rules! _memoffset__offset_of_union_impl {
     ($parent:path, $field:tt) => {{
         $crate::__priv::mem::offset_of!($parent, $field)
@@ -350,7 +382,7 @@ mod tests {
 
     #[cfg(any(
         feature = "unstable_const",
-        feature = "unstable_offset_of",
+        any(feature = "unstable_offset_of", stable_offset_of),
         stable_const
     ))]
     #[test]
@@ -379,7 +411,7 @@ mod tests {
 
     #[cfg(any(
         feature = "unstable_const",
-        feature = "unstable_offset_of",
+        any(feature = "unstable_offset_of", stable_offset_of),
         stable_const
     ))]
     #[test]

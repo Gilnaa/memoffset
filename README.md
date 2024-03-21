@@ -12,6 +12,8 @@ Introduces the following macros:
 
 `memoffset` works under `no_std` environments.
 
+If you're using a rustc version greater or equal to 1.77, this crate's `offset_of!()` macro simply forwards to `core::mem::offset_of!()`.
+
 ## Usage ##
 Add the following dependency to your `Cargo.toml`:
 
@@ -53,13 +55,11 @@ fn main() {
 Constant evaluation is automatically enabled and available on stable compilers starting with rustc 1.65.
 
 This is an incomplete implementation with one caveat:
-Due to dependence on [`#![feature(const_refs_to_cell)]`](https://github.com/rust-lang/rust/issues/80384), you cannot get the offset of a `Cell` field in a const-context.
+Due to dependence on [`#![feature(const_refs_to_cell)]`](https://github.com/rust-lang/rust/issues/80384), you cannot get the offset of a `Cell` field in a const-context on a rustc version less than 1.77.
 
-This means that if need to get the offset of a cell, you'll have to remain on nightly for now.
+### Usage on somewhat recent nightlies ###
 
-### Usage on recent nightlies ###
-
-If you're using a new-enough nightly and you require the ability to get the offset of a `Cell`,
+If you're using a nightly that does not yet have `core::mem::offset_of!()` and you require the ability to get the offset of a `Cell`,
 you'll have to enable the `unstable_const` cargo feature, as well as enabling `const_refs_to_cell` in your crate root.
 
 Do note that `unstable_const` is an unstable feature that is set to be removed in a future version of `memoffset`.
