@@ -67,7 +67,7 @@ macro_rules! _memoffset_offset_from_unsafe {
         ($field as usize) - ($base as usize)
     };
 }
-#[cfg(not(any(feature = "unstable_offset_of", stable_offset_of)))]
+#[cfg(not(stable_offset_of))]
 #[macro_export(local_inner_macros)]
 #[doc(hidden)]
 macro_rules! _memoffset__offset_of_impl {
@@ -80,13 +80,9 @@ macro_rules! _memoffset__offset_of_impl {
         _memoffset_offset_from_unsafe!(field_ptr, base_ptr)
     }};
 }
-#[cfg(any(feature = "unstable_offset_of", stable_offset_of))]
+#[cfg(stable_offset_of)]
 #[macro_export]
 #[doc(hidden)]
-#[cfg_attr(
-    all(feature = "unstable_offset_of", not(stable_offset_of)),
-    allow_internal_unstable(offset_of)
-)]
 macro_rules! _memoffset__offset_of_impl {
     ($parent:path, $field:tt) => {{
         $crate::__priv::mem::offset_of!($parent, $field)
@@ -129,7 +125,7 @@ macro_rules! offset_of {
 }
 
 #[cfg(tuple_ty)]
-#[cfg(not(any(feature = "unstable_offset_of", stable_offset_of)))]
+#[cfg(not(stable_offset_of))]
 #[macro_export(local_inner_macros)]
 #[doc(hidden)]
 macro_rules! _memoffset__offset_of_tuple_impl {
@@ -144,13 +140,9 @@ macro_rules! _memoffset__offset_of_tuple_impl {
 }
 
 #[cfg(tuple_ty)]
-#[cfg(any(feature = "unstable_offset_of", stable_offset_of))]
+#[cfg(stable_offset_of)]
 #[macro_export(local_inner_macros)]
 #[doc(hidden)]
-#[cfg_attr(
-    all(feature = "unstable_offset_of", not(stable_offset_of)),
-    allow_internal_unstable(offset_of)
-)]
 macro_rules! _memoffset__offset_of_tuple_impl {
     ($parent:ty, $field:tt) => {{
         $crate::__priv::mem::offset_of!($parent, $field)
@@ -175,7 +167,7 @@ macro_rules! offset_of_tuple {
     }};
 }
 
-#[cfg(not(any(feature = "unstable_offset_of", stable_offset_of)))]
+#[cfg(not(stable_offset_of))]
 #[macro_export(local_inner_macros)]
 #[doc(hidden)]
 macro_rules! _memoffset__offset_of_union_impl {
@@ -189,13 +181,9 @@ macro_rules! _memoffset__offset_of_union_impl {
     }};
 }
 
-#[cfg(any(feature = "unstable_offset_of", stable_offset_of))]
+#[cfg(stable_offset_of)]
 #[macro_export(local_inner_macros)]
 #[doc(hidden)]
-#[cfg_attr(
-    all(feature = "unstable_offset_of", not(stable_offset_of)),
-    allow_internal_unstable(offset_of)
-)]
 macro_rules! _memoffset__offset_of_union_impl {
     ($parent:path, $field:tt) => {{
         $crate::__priv::mem::offset_of!($parent, $field)
@@ -380,11 +368,7 @@ mod tests {
         assert_eq!(f_ptr as usize + 0, raw_field_union!(f_ptr, Foo, c) as usize);
     }
 
-    #[cfg(any(
-        feature = "unstable_const",
-        any(feature = "unstable_offset_of", stable_offset_of),
-        stable_const
-    ))]
+    #[cfg(any(feature = "unstable_const", stable_offset_of, stable_const))]
     #[test]
     fn const_offset() {
         #[repr(C)]
@@ -409,11 +393,7 @@ mod tests {
         assert_eq!([0; offset_of!(Foo, b)].len(), 4);
     }
 
-    #[cfg(any(
-        feature = "unstable_const",
-        any(feature = "unstable_offset_of", stable_offset_of),
-        stable_const
-    ))]
+    #[cfg(any(feature = "unstable_const", stable_offset_of, stable_const))]
     #[test]
     fn const_fn_offset() {
         const fn test_fn() -> usize {
