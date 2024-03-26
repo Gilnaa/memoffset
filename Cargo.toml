@@ -17,4 +17,6 @@ doc-comment = "0.3"
 
 [features]
 default = []
+# NOP features, solely so that people do not have to change their Cargo.toml
+unstable_offset_of = []
 unstable_const = []

@@ -4,11 +4,11 @@
  - Clarify documentation about macro indirection
  - Added changelog
  - Turn the crate into a thin stdlib wrapper on rustc>=1.77
- - Remove `unstable_offset_of`
+ - Turn `unstable_offset_of` and `unstable_const` into NOPs; they are not needed any more on recent nightlies
 
 ## v0.9.0 (18/05/2023)
 ### Added
- - Cargo feature `unstable_offset_of` which turns the crate into an stdlib polyfill
+ - Cargo feature `unstable_offset_of` which turns the crate into a stdlib polyfill
 
 ## v0.8.0 (15/12/2022)
 ### Changed

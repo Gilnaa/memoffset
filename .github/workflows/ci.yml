@@ -33,9 +33,7 @@ jobs:
           - 1.40.0  # Oldest supported with cfg(doctest)
           - 1.51.0  # Oldest supported with ptr::addr_of!
           - 1.65.0  # Oldest supported with stable const evaluation (sans cell)
-          - stable
-          - beta
-          - nightly
+          - 1.77.0  # Oldest supported with native `offset_of!`
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
@@ -45,20 +43,6 @@ jobs:
         # Exclude doctests here, as we don't want to clutter docs themselves
         # with backwards compatibility workarounds.
         run: cargo test --lib
-
-  nightly:
-    name: Test Suite (nightly features)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly
-      - name: Run cargo test
-        # `--lib` prevents doctests from being run.
-        # This is due to `unstable_const` requiring extra `feature(...)` directives
-        # which the doctests do not have.
-        run: cargo test --all-features --lib
 
   miri:
     name: Test Suite (Miri)
@@ -72,7 +56,6 @@ jobs:
       - name: Test with Miri
         run: |
           cargo miri test
-          cargo miri test --all-features
 
   style:
     name: lints and formatting
