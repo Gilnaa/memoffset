@@ -4,7 +4,7 @@
  - Clarify documentation about macro indirection
  - Added changelog
  - Turn the crate into a thin stdlib wrapper on rustc>=1.77
- - Remove `unstable_offset_of`
+ - Remove `unstable_offset_of` and `unstable_const`; they are not needed any more on recent nightlies
 
 ## v0.9.0 (18/05/2023)
 ### Added

@@ -46,7 +46,7 @@ macro_rules! _memoffset__let_base_ptr {
 }
 
 /// Macro to compute the distance between two pointers.
-#[cfg(any(feature = "unstable_const", stable_const))]
+#[cfg(stable_const)]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset_offset_from_unsafe {
@@ -58,7 +58,7 @@ macro_rules! _memoffset_offset_from_unsafe {
         unsafe { (field as *const u8).offset_from(base as *const u8) as usize }
     }};
 }
-#[cfg(not(any(feature = "unstable_const", stable_const)))]
+#[cfg(not(stable_const))]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! _memoffset_offset_from_unsafe {
@@ -368,7 +368,7 @@ mod tests {
         assert_eq!(f_ptr as usize + 0, raw_field_union!(f_ptr, Foo, c) as usize);
     }
 
-    #[cfg(any(feature = "unstable_const", stable_offset_of, stable_const))]
+    #[cfg(any(stable_offset_of, stable_const))]
     #[test]
     fn const_offset() {
         #[repr(C)]
@@ -381,7 +381,7 @@ mod tests {
         assert_eq!([0; offset_of!(Foo, b)].len(), 4);
     }
 
-    #[cfg(feature = "unstable_const")]
+    #[cfg(stable_offset_of)]
     #[test]
     fn const_offset_interior_mutable() {
         #[repr(C)]
@@ -393,7 +393,7 @@ mod tests {
         assert_eq!([0; offset_of!(Foo, b)].len(), 4);
     }
 
-    #[cfg(any(feature = "unstable_const", stable_offset_of, stable_const))]
+    #[cfg(any(stable_offset_of, stable_const))]
     #[test]
     fn const_fn_offset() {
         const fn test_fn() -> usize {

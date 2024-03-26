@@ -49,37 +49,7 @@ fn main() {
 ```
 
 ## Usage in constants ##
-`memoffset` has support for compile-time `offset_of!` on rust>=1.65, or on older nightly compilers.
+`memoffset` has support for compile-time `offset_of!` on rust>=1.65.
 
-### Usage on stable Rust ###
-Constant evaluation is automatically enabled and available on stable compilers starting with rustc 1.65.
-
-This is an incomplete implementation with one caveat:
-Due to dependence on [`#![feature(const_refs_to_cell)]`](https://github.com/rust-lang/rust/issues/80384), you cannot get the offset of a `Cell` field in a const-context on a rustc version less than 1.77.
-
-### Usage on somewhat recent nightlies ###
-
-If you're using a nightly that does not yet have `core::mem::offset_of!()` and you require the ability to get the offset of a `Cell`,
-you'll have to enable the `unstable_const` cargo feature, as well as enabling `const_refs_to_cell` in your crate root.
-
-Do note that `unstable_const` is an unstable feature that is set to be removed in a future version of `memoffset`.
-
-Cargo.toml:
-```toml
-[dependencies.memoffset]
-version = "0.9"
-features = ["unstable_const"]
-```
-
-Your crate root: (`lib.rs`/`main.rs`)
-```rust,ignore
-#![feature(const_refs_to_cell)]
-```
-
-### Usage on older nightlies ###
-In order to use it on an older nightly compiler, you must enable the `unstable_const` crate feature and several compiler features.
-
-Your crate root: (`lib.rs`/`main.rs`)
-```rust,ignore
-#![feature(const_ptr_offset_from, const_refs_to_cell)]
-```
+On versions below 1.77, this is an incomplete implementation with one caveat:
+Due to dependence on [`#![feature(const_refs_to_cell)]`](https://github.com/rust-lang/rust/issues/80384), you cannot get the offset of a `Cell` field in a const-context.

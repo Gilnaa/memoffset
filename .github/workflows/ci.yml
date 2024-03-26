@@ -47,20 +47,6 @@ jobs:
         # with backwards compatibility workarounds.
         run: cargo test --lib
 
-  nightly:
-    name: Test Suite (nightly features)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly
-      - name: Run cargo test
-        # `--lib` prevents doctests from being run.
-        # This is due to `unstable_const` requiring extra `feature(...)` directives
-        # which the doctests do not have.
-        run: cargo test --all-features --lib
-
   miri:
     name: Test Suite (Miri)
     runs-on: ubuntu-latest
