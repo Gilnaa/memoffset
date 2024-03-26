@@ -237,7 +237,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(miri, ignore)] // this creates unaligned references
     fn offset_simple_packed() {
         #[repr(C, packed)]
         struct Foo {
