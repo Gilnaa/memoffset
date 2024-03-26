@@ -1,8 +1,13 @@
 # Changelog
 
 ## Unreleased
- - Clarify documentation about macro indirection
+
+## v0.9.1 (26/03/2024)
+### Added
  - Added changelog
+
+### Changed
+ - Clarify documentation about macro indirection
  - Turn the crate into a thin stdlib wrapper on rustc>=1.77
  - Turn `unstable_offset_of` and `unstable_const` into NOPs; they are not needed any more on recent nightlies
 
